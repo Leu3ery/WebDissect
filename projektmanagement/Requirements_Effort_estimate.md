@@ -1,6 +1,6 @@
 # Requirements
 
-3. Register and login with school email (vie verif code on @htlstp.at)
+1. Register and login with school email (vie verif code on @htlstp.at)
 2. User account management (change password)
 3. Manage projects (create + update [upload har files + target url])
 4. Ability to start website analysis and save the result or get old one (dns, tech stack fingerprinting, endpoints mapping, SSL/TLS certificate check)
