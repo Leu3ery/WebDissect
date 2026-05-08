@@ -1,0 +1,70 @@
+# ========================
+# WebStorm / JetBrains
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ========================
+# Python (backend)
+# ========================
+backend/__pycache__/
+backend/**/__pycache__/
+**/*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+backend/dist/
+backend/build/
+.venv/
+venv/
+ENV/
+env/
+
+# Type checking / linting
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ========================
+# TypeScript (frontend)
+# ========================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+frontend/out/
+*.js.map
+*.d.ts.map
+.npm/
+
+# ========================
+# Environment
+# ========================
+.env
+.env.local
+.env.*.local
+*.env
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ========================
+# Logs
+# ========================
+*.log
+logs/
+npm-debug.log*
