@@ -54,3 +54,7 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## Important
+When reviewing bugs or changes, ALWAYS re-read the relevant file
+before analyzing — do not rely on previously cached content.
