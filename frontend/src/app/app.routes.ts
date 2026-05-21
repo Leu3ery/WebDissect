@@ -3,7 +3,7 @@ import {Login} from './features/login/login';
 export const routes: Routes = [
   {
     path: 'login',
-    component: Login,
+    loadComponent: () => import('./features/login/login').then(m => m.Login),
     title: "Login"
   },
   {

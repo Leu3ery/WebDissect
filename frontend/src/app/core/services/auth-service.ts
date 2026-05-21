@@ -28,7 +28,7 @@ export class AuthService {
     return this.http.post<ApiResponse<null>>(`${config.apiUrl}/register`, {email})
   }
 
-  codeSubmit(email: string, code: number) {
+  codeSubmit(email: string, code: string) {
     return this.http.post<ApiResponse<{token: string}>>(`${config.apiUrl}/code/submit`, {email, code}).pipe(tap(res => {
       localStorage.setItem("token", res.data.token)
     }));
@@ -38,5 +38,10 @@ export class AuthService {
     return this.http.get<ApiResponse<User>>(`${config.apiUrl}/me`).pipe(tap(res => {
       this._user.set(res.data);
     }));
+  }
+
+  logout() {
+    localStorage.removeItem("token");
+    this._user.set(null);
   }
 }
