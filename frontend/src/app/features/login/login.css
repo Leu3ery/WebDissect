@@ -1,0 +1,55 @@
+.login-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.buttons-container {
+  width: 300px;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  gap: .3rem;
+  padding: .3rem;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  background-color: var(--panel-2);
+}
+
+.switch-button {
+  flex: 1;
+  border: none;
+  height: 1.5rem;
+  color: var(--text-2);
+  text-align: center;
+  font-size: var(--text-sm);
+
+  transition: background-color 0.2s ease,
+              color 0.2s ease,
+              transform 0.1s ease;
+}
+
+.switch-button-active {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  border-radius: .3rem;
+}
+
+.switch-button:hover {
+  cursor: pointer;
+}
+
+
+@media (min-width: 768px) {
+  .login-container {
+    width: 400px;
+    padding: 2rem;
+    background-color: var(--panel);
+    border-radius: .5rem;
+    border: 2px solid var(--border);
+  }
+}
