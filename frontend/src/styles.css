@@ -18,6 +18,7 @@
   --accent-soft:rgba(0,212,255,.12);
   --warn:#f5b942;
   --danger:#ff4d6d;
+  --danger-2:#ff7a90;
   --violet:#a78bfa;
   /*--grid: linear-gradient(transparent 0 31px, rgba(255,255,255,.025) 31px 32px),*/
   /*linear-gradient(90deg, transparent 0 31px, rgba(255,255,255,.025) 31px 32px);*/
@@ -75,3 +76,29 @@ html, body {
 label.field{display:flex;flex-direction:column;gap:6px}
 label.field>span.lbl{font:500 11px/1 var(--sans);text-transform:uppercase;letter-spacing:.08em;
   color:var(--text-2)}
+
+
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background-color: var(--border);
+}
+
+.dot.active {
+  width: 15px;
+  background-color: var(--accent);
+}
+
+.dot.touched {
+  background-color: var(--accent);
+}
+
+.error-field {
+  font-size: var(--text-sm);
+  font-weight: 200;
+  color: var(--danger-2);
+  width: 100%;
+  border-radius: .3rem;
+}

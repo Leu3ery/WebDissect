@@ -1,0 +1,16 @@
+.code-box {
+  border: 1px solid var(--border);
+  background-color: var(--panel-3);
+  font-size: var(--text-4xl);
+  border-radius: .5rem;
+  width: 3rem;
+  text-align: center;
+  outline: none;
+  appearance: none;
+}
+
+.code-box:focus {
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(0,212,255,.12);
+}
+
