@@ -1,0 +1,16 @@
+# General
+resend
+
+
+# API
+fastapi
+python-jose
+uvicorn
+
+# DB
+sqlalchemy
+
+# API + DB
+pydantic
+pydantic-settings
+

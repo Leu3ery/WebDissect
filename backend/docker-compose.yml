@@ -1,0 +1,12 @@
+services:
+    server:
+        build:
+            context: .
+            dockerfile: server/Dockerfile
+
+    tools:
+        build:
+            context: .
+            dockerfile: tools/Dockerfile
+
+
