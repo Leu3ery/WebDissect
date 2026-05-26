@@ -13,7 +13,7 @@
           @if (mailForm.controls.email.hasError('pattern')) { Use your school email (firstname.lastname&#64;htlstp.at) }
         }
       </div>
-      @if (stage1Error()) {
+      @if (mailForm.valid && stage1Error()) {
         <div class="error-field">
           {{stage1Error()}}
         </div>
@@ -42,7 +42,7 @@
           Please input 6 digits
         }
       </div>
-      @if (stage2Error()) {
+      @if (codeForm.valid && stage2Error()) {
         <div class="error-field">
           {{stage2Error()}}
         </div>

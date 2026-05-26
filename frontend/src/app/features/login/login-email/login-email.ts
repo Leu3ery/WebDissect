@@ -62,7 +62,7 @@ export class LoginEmail {
 
   verify() {
     if (this.codeForm.invalid) return;
-    const res = this.authService.codeSubmit(this.mailForm.controls.email.value!, this.fullCode()).subscribe(
+    this.authService.codeSubmit(this.mailForm.controls.email.value!, this.fullCode()).subscribe(
       (res) => {
         if (!res.isSuccess) {
           this.stage2Error.set(res.message)
@@ -75,7 +75,7 @@ export class LoginEmail {
 
   sendCode() {
     if (this.mailForm.invalid) return;
-    const res = this.authService.register(this.mailForm.controls.email.value!).subscribe({
+    this.authService.register(this.mailForm.controls.email.value!).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
           this.stage1Error.set(res.message)
