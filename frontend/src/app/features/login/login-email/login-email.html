@@ -1,4 +1,3 @@
-<script src="login-email.ts"></script>
 <div class="w-full flex flex-col gap-4">
   <div class="flex justify-center gap-1">
     <div class="dot" [class.active]="stage()==1" [class.touched]="stage()>1"></div>
@@ -14,6 +13,11 @@
           @if (mailForm.controls.email.hasError('pattern')) { Use your school email (firstname.lastname&#64;htlstp.at) }
         }
       </div>
+      @if (stage1Error()) {
+        <div class="error-field">
+          {{stage1Error()}}
+        </div>
+      }
       <button type="submit" [disabled]="mailForm.invalid" class="mt-2 btn btn-primary">Send code ></button>
     </form>
   } @else if (stage() == 2) {
@@ -38,6 +42,11 @@
           Please input 6 digits
         }
       </div>
+      @if (stage2Error()) {
+        <div class="error-field">
+          {{stage2Error()}}
+        </div>
+      }
       <button type="submit" [disabled]="codeForm.invalid" class="mt-2 btn btn-primary">Verify</button>
     </form>
     <div class="flex justify-between">

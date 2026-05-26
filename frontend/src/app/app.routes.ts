@@ -7,6 +7,11 @@ export const routes: Routes = [
     title: "Login"
   },
   {
+    path: 'projects',
+    loadComponent: () => import('./features/projects/projects').then(m => m.Projects),
+    title: "Projects"
+  },
+  {
     path: '**',
     loadComponent: () => import('./features/not-found-page/not-found-page').then(m => m.NotFoundPage),
     title: 'Page Not Found'

@@ -1,5 +1,7 @@
 import {Component, ElementRef, inject, QueryList, signal, ViewChild, ViewChildren} from '@angular/core';
 import {FormArray, FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AuthService} from '../../../core/services/auth-service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-login-email',
@@ -15,6 +17,10 @@ export class LoginEmail {
   private fb = inject(FormBuilder);
   stage = signal(1);
   readyToResendIn = signal(5);
+  authService = inject(AuthService);
+  private router = inject(Router);
+  stage1Error = signal('')
+  stage2Error = signal('')
 
   mailForm = this.fb.group({
     email: ['', [Validators.required, Validators.email, Validators.pattern("[a-z]+.[a-z]+@htlstp.at")]],
@@ -56,12 +62,29 @@ export class LoginEmail {
 
   verify() {
     if (this.codeForm.invalid) return;
+    const res = this.authService.codeSubmit(this.mailForm.controls.email.value!, this.fullCode()).subscribe(
+      (res) => {
+        if (!res.isSuccess) {
+          this.stage2Error.set(res.message)
+          return;
+        }
+        this.router.navigate(['/projects']);
+      }
+    )
   }
 
   sendCode() {
     if (this.mailForm.invalid) return;
-    this.codeForm.reset();
-    this.goToStage(2)
+    const res = this.authService.register(this.mailForm.controls.email.value!).subscribe({
+      next: (res) => {
+        if (!res.isSuccess) {
+          this.stage1Error.set(res.message)
+          return;
+        }
+        this.codeForm.reset();
+        this.goToStage(2)
+      }
+    })
   }
 
   onInput(e: Event, i: number) {
