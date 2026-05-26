@@ -1,1 +1,7 @@
-<p>projects works!</p>
+<div class="dashboard">
+  @if (isMobile() && isNavLeftOpen()) {
+    <div class="overlay" (click)="setNavLeft(false)"></div>
+  }
+  <app-nav-left class="nav-left" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
+  <app-project class="project" (openNavLeftOutput)="setNavLeft(true)"></app-project>
+</div>
