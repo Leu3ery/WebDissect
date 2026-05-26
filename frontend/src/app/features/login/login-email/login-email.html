@@ -1,0 +1,67 @@
+<div class="w-full flex flex-col gap-4">
+  <div class="flex justify-center gap-1">
+    <div class="dot" [class.active]="stage()==1" [class.touched]="stage()>1"></div>
+    <div class="dot" [class.active]="stage()==2" [class.touched]="stage()>2"></div>
+  </div>
+  @if (stage() == 1) {
+    <form [formGroup]="mailForm" (ngSubmit)="sendCode()" class="w-full flex flex-col gap-1.5">
+      <label class="text-xs text-(--text-2)" for="email">SCHOOL EMAIL</label>
+      <input formControlName="email" class="input w" type="text" name="email" placeholder="firstname.lastname@htlstp.at">
+      <div class="error-field">
+        @if (mailForm.controls.email.touched) {
+          @if (mailForm.controls.email.hasError('required')) { Email is required }
+          @if (mailForm.controls.email.hasError('pattern')) { Use your school email (firstname.lastname&#64;htlstp.at) }
+        }
+      </div>
+      @if (mailForm.valid && stage1Error()) {
+        <div class="error-field">
+          {{stage1Error()}}
+        </div>
+      }
+      <button type="submit" [disabled]="mailForm.invalid" class="mt-2 btn btn-primary">Send code ></button>
+    </form>
+  } @else if (stage() == 2) {
+    <form [formGroup]="codeForm" (ngSubmit)="verify()" class="w-full flex flex-col gap-1.5">
+      <label class="text-xs text-(--text-2)" for="email">VERIFICATION CODE</label>
+      <p class="text-xs text-(--text-2)">We sent a 6-digit code to </p>
+      <div class="mt-2 flex justify-between">
+        @for (ctrl of digits.controls; track $index) {
+          <input
+            class="code-box"
+            [formControl]="$any(ctrl)"
+            maxlength="1"
+            inputmode="numeric"
+            (input)="onInput($event, $index)"
+            (keydown)="onKeydown($event, $index)"
+            #digitInput
+          />
+        }
+      </div>
+      <div class="error-field">
+        @if (codeForm.touched && codeForm.invalid && fullCode().length == 6) {
+          Please input 6 digits
+        }
+      </div>
+      @if (codeForm.valid && stage2Error()) {
+        <div class="error-field">
+          {{stage2Error()}}
+        </div>
+      }
+      <button type="submit" [disabled]="codeForm.invalid" class="mt-2 btn btn-primary">Verify</button>
+    </form>
+    <div class="flex justify-between">
+      <button (click)="goToStage(1)" class="border-none bg-none text-xs text-(--text-2) hover:cursor-pointer">< Wrong email?</button>
+      @if (readyToResendIn() == 0) {
+        <button (click)="sendCode()" class="border-none bg-none text-xs text-(--accent) hover:cursor-pointer">Resend</button>
+      } @else {
+        <p class="text-xs text-(--text-2)">Resend in {{readyToResendIn()}}</p>
+      }
+    </div>
+  } @else {
+    <button disabled class="btn btn-primary">Save</button>
+  }
+
+</div>
+
+
+
