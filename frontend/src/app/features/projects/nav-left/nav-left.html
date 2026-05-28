@@ -11,16 +11,16 @@
       <p class="text-xs text-(--text-2)">{{projectService.projects().length}}</p>
     </div>
     @for (p of projectService.projects(); track p.id) {
-      <button class="project">
+      <button [class.active]="projectId() == p.id" (click)="openProject(p.id)" class="project">
         <p>{{p.name}}</p>
         <p class="text-(--text-2)">{{p.domain}}</p>
       </button>
     }
   </div>
   <div class="p-4">
-    <div class="flex justify-between items-center p-4 border border-(--border) rounded-lg">
+    <div class="flex justify-between items-center p-4 border border-(--border) rounded-lg bg-(--panel-3)">
       <p>{{authService.user()?.email}}</p>
-      <svg lucideSettings class="hover:cursor-pointer"></svg>
+      <svg lucideSettings class="hover:cursor-pointer" (click)="openSettings()"></svg>
     </div>
   </div>
 </div>

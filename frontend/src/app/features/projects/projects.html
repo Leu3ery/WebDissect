@@ -2,6 +2,14 @@
   @if (isMobile() && isNavLeftOpen()) {
     <div class="overlay" (click)="setNavLeft(false)"></div>
   }
-  <app-nav-left class="nav-left" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
-  <app-project class="project" (openNavLeftOutput)="setNavLeft(true)"></app-project>
+  <app-nav-left class="nav-left" [projectId]="projectId()" (openSettingsOutput)="setSettingsOpen(true)" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
+  <app-project class="project" [projectId]="projectId()" (openNavLeftOutput)="setNavLeft(true)"></app-project>
+
+  @if (isSettingsOpen()) {
+    <div class="settings-overlay" (click)="setSettingsOpen(false)"></div>
+  }
+  <div class="settings" [class.active]="isSettingsOpen()">
+    test
+  </div>
+
 </div>

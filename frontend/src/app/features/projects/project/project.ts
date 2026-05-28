@@ -1,4 +1,4 @@
-import {Component, output} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 
 @Component({
   selector: 'app-project',
@@ -7,6 +7,7 @@ import {Component, output} from '@angular/core';
   styleUrl: './project.css',
 })
 export class Project {
+  projectId = input()
   openNavLeftOutput = output()
 
   openNavLeft() {
