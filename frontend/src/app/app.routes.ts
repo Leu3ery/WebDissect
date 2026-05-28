@@ -12,6 +12,11 @@ export const routes: Routes = [
     title: "Projects"
   },
   {
+    path: '',
+    redirectTo: 'login',
+    pathMatch: 'full',
+  },
+  {
     path: '**',
     loadComponent: () => import('./features/not-found-page/not-found-page').then(m => m.NotFoundPage),
     title: 'Page Not Found'

@@ -20,6 +20,6 @@ export const appConfig: ApplicationConfig = {
         const authService = inject(AuthService);
         authService.getMe().subscribe()
       }
-    )
+    ),
   ]
 };
