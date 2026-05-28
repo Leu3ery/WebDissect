@@ -3,17 +3,24 @@ import {fromEvent, map} from 'rxjs';
 import {Project} from './project/project';
 import {NavLeft} from './nav-left/nav-left';
 import {ProjectsService} from './projects-service';
+import {AuthService} from '../../core/services/auth-service';
+import {LucideKey, LucideLogOut} from '@lucide/angular';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-projects',
   imports: [
     Project,
-    NavLeft
+    NavLeft,
+    LucideKey,
+    LucideLogOut
   ],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
 })
 export class Projects implements OnDestroy, OnInit {
+  authService = inject(AuthService);
+  router = inject(Router);
   isMobile = signal(window.innerWidth < 768);
   isNavLeftOpen = signal(false);
   isSettingsOpen = signal(false);
@@ -37,5 +44,10 @@ export class Projects implements OnDestroy, OnInit {
 
   setSettingsOpen(state: boolean) {
     this.isSettingsOpen.set(state)
+  }
+
+  logout(): void {
+    this.authService.logout()
+    this.router.navigate(['login'])
   }
 }

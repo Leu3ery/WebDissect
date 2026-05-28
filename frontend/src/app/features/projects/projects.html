@@ -9,7 +9,15 @@
     <div class="settings-overlay" (click)="setSettingsOpen(false)"></div>
   }
   <div class="settings" [class.active]="isSettingsOpen()">
-    test
+    <p class="text-(--text-2) border-b p-2">{{authService.user()?.email}}</p>
+    <button class="settings-button">
+      <svg lucideKey size="16px"></svg>
+      <p>Change password</p>
+    </button>
+    <button class="settings-button" (click)="logout()">
+      <svg lucideLogOut color="var(--danger-2)" size="16px"></svg>
+      <p class="text-(--danger-2)">Log out</p>
+    </button>
   </div>
 
 </div>

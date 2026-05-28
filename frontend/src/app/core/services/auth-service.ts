@@ -21,9 +21,11 @@ export class AuthService {
   login(email: string, password: string) {
     // return this.http.post<ApiResponse<{token: string}>>(`${config.apiUrl}/login`, {email, password}).pipe(tap(res => {
     //   localStorage.setItem("token", res.data.token)
+    //   this.getMe().subscribe()
     // }));
     return of<ApiResponse<{token: string}>>({data:{token: "token"}, message: "test", isSuccess: true}).pipe(tap(res => {
       localStorage.setItem("token", res.data.token)
+      this.getMe().subscribe()
     }));
   }
 
@@ -35,9 +37,11 @@ export class AuthService {
   codeSubmit(email: string, code: string) {
     // return this.http.post<ApiResponse<{token: string}>>(`${config.apiUrl}/code/submit`, {email, code}).pipe(tap(res => {
     //   localStorage.setItem("token", res.data.token)
+    //   this.getMe().subscribe()
     // }));
     return of<ApiResponse<{token: string}>>({data:{token: "token"}, message: "test", isSuccess: true}).pipe(tap(res => {
       localStorage.setItem("token", res.data.token)
+      this.getMe().subscribe()
     }));
   }
 
