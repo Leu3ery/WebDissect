@@ -1,5 +1,7 @@
 services:
     backend-server:
+        ports:
+            - "6767:6767"
         build:
             context: .
             dockerfile: backend/server/Dockerfile
