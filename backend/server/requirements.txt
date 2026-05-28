@@ -6,6 +6,7 @@ resend
 fastapi
 python-jose
 uvicorn
+python-multipart
 
 # DB
 sqlalchemy
