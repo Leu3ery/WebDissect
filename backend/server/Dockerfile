@@ -10,9 +10,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/shared_models/ ./shared_models/
 RUN pip install ./shared_models
 
+COPY backend/server/pyproject.toml .
 RUN pip install -e .
 
 COPY backend/server/app/ ./app/
 
+EXPOSE 6767
 
-CMD ["python", "-m", "app"]
+
+ENTRYPOINT ["python", "-m", "app"]
