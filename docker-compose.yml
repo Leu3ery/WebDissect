@@ -4,6 +4,8 @@ services:
             - "60000:6767"
         volumes:
             -   "./db:/app/db"
+        env_file:
+            -  ".env"
         build:
             context: .
             dockerfile: backend/server/Dockerfile
