@@ -1,12 +1,12 @@
 services:
-    server:
+    backend-server:
         build:
             context: .
-            dockerfile: server/Dockerfile
+            dockerfile: backend/server/Dockerfile
 
-    tools:
+    backend-tools:
         build:
             context: .
-            dockerfile: tools/Dockerfile
+            dockerfile: backend/tools/Dockerfile
 
 
