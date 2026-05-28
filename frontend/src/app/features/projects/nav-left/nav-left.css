@@ -3,3 +3,22 @@
     display: none;
   }
 }
+
+.project {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  border: 1px var(--border) solid;
+  border-radius: 0.5rem;
+}
+
+.project:hover {
+  cursor: pointer;
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.project.active {
+  background-color: var(--accent-soft);
+  border-color: var(--accent);
+}
