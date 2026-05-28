@@ -2,11 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from models._base import Base
+from app.config import get_settings
 
 
-DB_URL = ""  # TODO
-
-engine = create_engine(DB_URL, pool_pre_ping=True)
+engine = create_engine("/app/db/" + get_settings().DB_FILENAME, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
