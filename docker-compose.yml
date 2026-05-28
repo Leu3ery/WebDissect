@@ -1,7 +1,9 @@
 services:
     backend-server:
         ports:
-            - "6767:6767"
+            - "60000:6767"
+        volumes:
+            -   "./db:/app/db"
         build:
             context: .
             dockerfile: backend/server/Dockerfile
