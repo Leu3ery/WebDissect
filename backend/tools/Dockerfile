@@ -4,13 +4,13 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 
-COPY tools/requirements.txt .
+COPY backend/tools/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY shared_models/ ./shared_models/
+COPY backend/shared_models/ ./shared_models/
 RUN pip install ./shared_models
 
-COPY tools/app/ ./app/
+COPY backend/tools/app/ ./app/
 
 
 CMD ["python", "-m", "app"]
