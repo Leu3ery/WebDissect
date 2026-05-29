@@ -23,7 +23,7 @@ export class LoginEmail {
   stage2Error = signal('')
 
   mailForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email, Validators.pattern("[a-z]+.[a-z]+@htlstp.at")]],
+    email: ['', [Validators.required, Validators.email, Validators.pattern("[a-zA-Z]+.[a-zA-Z]+@htlstp.at")]],
   })
 
   codeForm = this.fb.group({
