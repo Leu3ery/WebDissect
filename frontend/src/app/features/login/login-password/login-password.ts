@@ -20,7 +20,7 @@ export class LoginPassword {
   private router = inject(Router);
   error = signal('')
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email, Validators.pattern("[a-z]+.[a-z]+@htlstp.at")]],
+    email: ['', [Validators.required, Validators.email, Validators.pattern("[a-zA-Z]+.[a-zA-Z]+@htlstp.at")]],
     password: ['', [Validators.required, Validators.minLength(8)]],
   })
 

@@ -52,7 +52,7 @@ html, body {
 
 /* Buttons */
 .btn{appearance:none;border:1px solid var(--border);background:#161924;color:var(--text);
-  font:500 13px/1 var(--sans);padding: 1rem;border-radius:8px;cursor:pointer;
+  font:500 13px/1 var(--sans);padding: .7rem;border-radius:8px;cursor:pointer;
   display:flex;justify-content: center;align-items:center;gap:8px;transition:border-color .15s, background .15s, transform .05s}
 .btn:hover{border-color:#3a3e4d;background:#1c2030}
 .btn:active{transform:translateY(1px)}

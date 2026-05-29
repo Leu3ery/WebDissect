@@ -54,6 +54,11 @@ export class AuthService {
     }));
   }
 
+  changePassword(password: string) {
+    // return this.http.patch<ApiResponse<null>>(`${config.apiUrl}/auth/me`, password);
+    return of<ApiResponse<null>>({data:null, message: "error aaaaa", isSuccess: true})
+  }
+
   logout() {
     localStorage.removeItem("token");
     this._user.set(null);

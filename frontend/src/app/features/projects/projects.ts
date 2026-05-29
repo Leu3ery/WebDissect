@@ -6,6 +6,7 @@ import {ProjectsService} from './projects-service';
 import {AuthService} from '../../core/services/auth-service';
 import {LucideKey, LucideLogOut} from '@lucide/angular';
 import {Router} from '@angular/router';
+import {ChangePassword} from './change-password/change-password';
 
 @Component({
   selector: 'app-projects',
@@ -13,7 +14,8 @@ import {Router} from '@angular/router';
     Project,
     NavLeft,
     LucideKey,
-    LucideLogOut
+    LucideLogOut,
+    ChangePassword
   ],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
@@ -24,6 +26,7 @@ export class Projects implements OnDestroy, OnInit {
   isMobile = signal(window.innerWidth < 768);
   isNavLeftOpen = signal(false);
   isSettingsOpen = signal(false);
+  isChangePasswordOpen = signal(false);
   projectId = input()
   private resizeSub = fromEvent(window, 'resize').pipe(
     map(() => window.innerWidth < 768)
@@ -44,6 +47,21 @@ export class Projects implements OnDestroy, OnInit {
 
   setSettingsOpen(state: boolean) {
     this.isSettingsOpen.set(state)
+  }
+
+  setChangePassword(state: boolean) {
+    this.isChangePasswordOpen.set(state)
+  }
+
+  openChangePassword() {
+    this.isChangePasswordOpen.set(true)
+    this.setSettingsOpen(false)
+    this.setNavLeft(false)
+  }
+
+  backFromChangePassword() {
+    this.isChangePasswordOpen.set(false)
+    this.setSettingsOpen(true)
   }
 
   logout(): void {
