@@ -4,13 +4,15 @@ WORKDIR /app
 
 ENV PYTHONUNBUFFERED=1
 
-COPY server/requirements.txt .
+COPY backend/server/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY shared_models/ ./shared_models/
-RUN pip install ./shared_models
+COPY backend/server/pyproject.toml .
+RUN pip install -e .
 
-COPY server/app/ ./app/
+COPY backend/server/app/ ./app/
+
+EXPOSE 6767
 
 
-CMD ["python", "-m", "app"]
+ENTRYPOINT ["python", "-m", "app"]

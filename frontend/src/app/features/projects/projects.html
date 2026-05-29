@@ -1,7 +1,30 @@
 <div class="dashboard">
   @if (isMobile() && isNavLeftOpen()) {
-    <div class="overlay" (click)="setNavLeft(false)"></div>
+    <div class="popup-overlay" (click)="setNavLeft(false)"></div>
   }
-  <app-nav-left class="nav-left" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
-  <app-project class="project" (openNavLeftOutput)="setNavLeft(true)"></app-project>
+  @if (isSettingsOpen()) {
+    <div class="popup-overlay" (click)="setSettingsOpen(false)"></div>
+  }
+  @if (isChangePasswordOpen()) {
+    <div class="popup-overlay" (click)="setChangePassword(false)"></div>
+  }
+
+  <app-nav-left class="nav-left" [projectId]="projectId()" (openSettingsOutput)="setSettingsOpen(true)" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
+  <app-project class="project" [projectId]="projectId()" (openNavLeftOutput)="setNavLeft(true)"></app-project>
+
+
+  <div class="popup settings" [class.active]="isSettingsOpen()">
+    <p class="text-(--text-2) border-b p-2">{{authService.user()?.email}}</p>
+    <button class="settings-button" (click)="openChangePassword()">
+      <svg lucideKey size="16px"></svg>
+      <p>Change password</p>
+    </button>
+    <button class="settings-button" (click)="logout()">
+      <svg lucideLogOut color="var(--danger-2)" size="16px"></svg>
+      <p class="text-(--danger-2)">Log out</p>
+    </button>
+  </div>
+  @if (isChangePasswordOpen()) {
+    <app-change-password (backFromChangePassword)="backFromChangePassword()" (closeChangePassword)="setChangePassword(false)" class="popup change-password" [class.active]="isChangePasswordOpen()"></app-change-password>
+  }
 </div>
