@@ -5,7 +5,7 @@ from app.db.models._base import Base
 from app.config import get_settings
 
 
-engine = create_engine("/app/db/" + get_settings().DB_FILENAME, pool_pre_ping=True)
+engine = create_engine("sqlite:////app/db/" + get_settings().DB_FILENAME, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
