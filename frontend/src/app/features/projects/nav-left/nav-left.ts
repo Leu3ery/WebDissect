@@ -20,6 +20,7 @@ export class NavLeft {
   router = inject(Router);
   closeNavLeftOutput = output()
   openSettingsOutput = output()
+  openNewProject = output()
   projectId = input()
 
 
