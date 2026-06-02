@@ -1,7 +1,7 @@
 services:
     backend-server:
-        ports:
-            - "60000:6767"
+        expose:
+            - "6767"
         volumes:
             -   "./db:/app/db"
         env_file:
@@ -10,8 +10,8 @@ services:
             context: .
             dockerfile: backend/server/Dockerfile
     frontend-server:
-        ports:
-            - "80:80"
+        expose:
+            - "80"
         build:
             context: ./frontend
             dockerfile: Dockerfile
