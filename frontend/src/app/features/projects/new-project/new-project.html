@@ -1,7 +1,24 @@
 <div class="p-4 flex flex-col w-full gap-2">
   <div class="flex items-center gap-4">
     <svg lucideUpload size="16px" color="var(--accent)"></svg>
-    <p class="text-lg">New analysis</p>
+    <p class="text-lg">New project</p>
   </div>
+  <form>
+    <label class="text-(--text-2) text-xs" for="url">TARGET URL</label>
+    <input class="input" name="url" type="url" id="url" placeholder="https://htlstp.at">
+    <label class="text-(--text-2) text-xs" for="har">HAR FILE</label>
+    <label class="har-input" for="har">
+      <svg lucideUpload size="24px" color="var(--text-2)"></svg>
+      @if (selectedFile()) {
+        <p>{{getFileName()}}</p>
+        <p class="text-(--text-2) text-xs">{{getFileSize() | number}} MB • Ready to analyse</p>
+      } @else {
+        <p>Drop a .har file of browse</p>
+        <p class="text-(--text-2) text-xs">Max 25 MB • Captured from DevTools › Network › Export HAR</p>
+      }
+    </label>
+    <input class="hidden" type="file" name="har" id="har" accept=".har" (change)="onFileChange($event)">
+    <button class="btn btn-primary mt-4 w-full" type="submit">Go to analyse</button>
+  </form>
 </div>
 
