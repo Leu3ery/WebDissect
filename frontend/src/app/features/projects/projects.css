@@ -40,12 +40,12 @@
 
 }
 
-.settings {
-  display: flex;
-  flex-direction: column;
-  gap: .5rem;
-  padding: 1rem;
-}
+/*.settings {*/
+/*  display: flex;*/
+/*  flex-direction: column;*/
+/*  gap: .5rem;*/
+/*  padding: 1rem;*/
+/*}*/
 
 .popup.active {
   transform: translateY(0);
@@ -61,16 +61,16 @@
   backdrop-filter: blur(5px);
 }
 
-.settings-button {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  padding: .5rem;
-}
+/*.settings-button {*/
+/*  display: flex;*/
+/*  gap: 1rem;*/
+/*  align-items: center;*/
+/*  padding: .5rem;*/
+/*}*/
 
-.settings-button:hover {
-  cursor: pointer;
-}
+/*.settings-button:hover {*/
+/*  cursor: pointer;*/
+/*}*/
 
 @media (min-width: 768px) {
   .nav-left {
@@ -99,6 +99,10 @@
 
   .change-password {
     width: 400px;
+  }
+
+  .new-project {
+    width: 450px;
   }
 
   .popup.active {

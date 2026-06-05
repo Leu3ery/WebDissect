@@ -8,23 +8,30 @@
   @if (isChangePasswordOpen()) {
     <div class="popup-overlay" (click)="setChangePassword(false)"></div>
   }
+  @if (isNewProjectOpen()) {
+    <div class="popup-overlay" (click)="setNewProjectOpen(false)"></div>
+  }
 
-  <app-nav-left class="nav-left" [projectId]="projectId()" (openSettingsOutput)="setSettingsOpen(true)" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
+  <app-nav-left class="nav-left" [projectId]="projectId()" (openNewProject)="openNewProject()" (openSettingsOutput)="setSettingsOpen(true)" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
   <app-project class="project" [projectId]="projectId()" (openNavLeftOutput)="setNavLeft(true)"></app-project>
 
 
-  <div class="popup settings" [class.active]="isSettingsOpen()">
-    <p class="text-(--text-2) border-b p-2">{{authService.user()?.email}}</p>
-    <button class="settings-button" (click)="openChangePassword()">
-      <svg lucideKey size="16px"></svg>
-      <p>Change password</p>
-    </button>
-    <button class="settings-button" (click)="logout()">
-      <svg lucideLogOut color="var(--danger-2)" size="16px"></svg>
-      <p class="text-(--danger-2)">Log out</p>
-    </button>
-  </div>
+<!--  <div class="popup settings" [class.active]="isSettingsOpen()">-->
+<!--    <p class="text-(&#45;&#45;text-2) border-b p-2">{{authService.user()?.email}}</p>-->
+<!--    <button class="settings-button" (click)="openChangePassword()">-->
+<!--      <svg lucideKey size="16px" color="var(&#45;&#45;accent)"></svg>-->
+<!--      <p>Change password</p>-->
+<!--    </button>-->
+<!--    <button class="settings-button" (click)="logout()">-->
+<!--      <svg lucideLogOut color="var(&#45;&#45;danger-2)" size="16px"></svg>-->
+<!--      <p class="text-(&#45;&#45;danger-2)">Log out</p>-->
+<!--    </button>-->
+<!--  </div>-->
+  <app-settings (logout)="logout()" (openChangePassword)="openChangePassword()" class="popup settings" [class.active]="isSettingsOpen()"></app-settings>
   @if (isChangePasswordOpen()) {
     <app-change-password (backFromChangePassword)="backFromChangePassword()" (closeChangePassword)="setChangePassword(false)" class="popup change-password" [class.active]="isChangePasswordOpen()"></app-change-password>
+  }
+  @if (isNewProjectOpen()) {
+    <app-new-project class="popup new-project" (closeProject)="closeNewProject()" [class.active]="isNewProjectOpen()"></app-new-project>
   }
 </div>

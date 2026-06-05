@@ -1,0 +1,12 @@
+.har-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: .5rem;
+  padding: 1.5rem;
+  background-color: var(--panel-3);
+  border: 1px dashed var(--border);
+  border-radius: .5rem;
+  justify-content: center;
+  align-items: center;
+}
