@@ -2,7 +2,7 @@ import {Component, inject, output, signal} from '@angular/core';
 import {LucideKey, LucideUpload} from '@lucide/angular';
 import {DecimalPipe} from '@angular/common';
 import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ProjectCreate, ProjectsService} from '../projects-service';
+import {ProjectCreateI, ProjectsService} from '../projects-service';
 import {Router} from '@angular/router';
 
 @Component({
@@ -51,7 +51,7 @@ export class NewProject {
     }
 
     const {name, domain} = this.form.getRawValue()
-    const project: ProjectCreate = {
+    const project: ProjectCreateI = {
       name: name!,
       domain: domain!,
       har: this.selectedFile() ?? undefined,
