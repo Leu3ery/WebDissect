@@ -32,6 +32,6 @@
     <app-change-password (backFromChangePassword)="backFromChangePassword()" (closeChangePassword)="setChangePassword(false)" class="popup change-password" [class.active]="isChangePasswordOpen()"></app-change-password>
   }
   @if (isNewProjectOpen()) {
-    <app-new-project class="popup new-project" [class.active]="isNewProjectOpen()"></app-new-project>
+    <app-new-project class="popup new-project" (closeProject)="closeNewProject()" [class.active]="isNewProjectOpen()"></app-new-project>
   }
 </div>

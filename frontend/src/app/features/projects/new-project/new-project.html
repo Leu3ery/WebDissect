@@ -3,9 +3,17 @@
     <svg lucideUpload size="16px" color="var(--accent)"></svg>
     <p class="text-lg">New project</p>
   </div>
-  <form>
-    <label class="text-(--text-2) text-xs" for="url">TARGET URL</label>
-    <input class="input" name="url" type="url" id="url" placeholder="https://htlstp.at">
+  <form [formGroup]="form" (ngSubmit)="createNewProject()">
+    <label class="text-(--text-2) text-xs" for="name">PROJECT NAME</label>
+    <input formControlName="name" class="input" name="name" type="text" id="name" placeholder="Project name">
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <div class="error-field">Name is required!</div>
+    }
+    <label class="text-(--text-2) text-xs" for="url">TARGET DOMAIN</label>
+    <input formControlName="domain" class="input" name="domain" type="text" id="domain" placeholder="htlstp.at">
+    @if (form.controls.domain.invalid && form.controls.domain.touched) {
+      <div class="error-field">Domain is required!</div>
+    }
     <label class="text-(--text-2) text-xs" for="har">HAR FILE</label>
     <label class="har-input" for="har">
       <svg lucideUpload size="24px" color="var(--text-2)"></svg>
@@ -17,8 +25,11 @@
         <p class="text-(--text-2) text-xs">Max 25 MB • Captured from DevTools › Network › Export HAR</p>
       }
     </label>
-    <input class="hidden" type="file" name="har" id="har" accept=".har" (change)="onFileChange($event)">
-    <button class="btn btn-primary mt-4 w-full" type="submit">Go to analyse</button>
+    <input formControlName="har" class="hidden" type="file" name="har" id="har" accept=".har" (change)="onFileChange($event)">
+    @if (error().length > 0) {
+      <div class="error-field">{{error()}}</div>
+    }
+    <button [disabled]="form.invalid || error().length > 0" class="btn btn-primary mt-4 w-full" type="submit">Go to analyse</button>
   </form>
 </div>
 

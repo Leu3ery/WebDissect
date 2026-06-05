@@ -82,4 +82,8 @@ export class Projects implements OnDestroy, OnInit {
     this.isNewProjectOpen.set(true)
     this.setNavLeft(false)
   }
+
+  closeNewProject() {
+    this.isNewProjectOpen.set(false)
+  }
 }
