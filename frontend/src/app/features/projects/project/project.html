@@ -1,3 +1,46 @@
-<button class="navbar-close-open-button" (click)="openNavLeft()">Open nav left</button>
+<div class="flex w-full h-full flex-col">
+  @if (project()) {
+    <div class="header">
+<!--      {{project() | json}}-->
+      <div>
+        <p class="text-lg">{{project()?.name}}</p>
+        <p class="text-(--text-2)">https://{{project()?.domain}}</p>
+      </div>
+      <svg lucideMenu class="navbar-close-open-button" (click)="openNavLeft()"></svg>
+    </div>
+  }
+  @if (project()) {
+    <div class="body">
+      {{project() | json}}
+    </div>
+  } @else if (!projectId()) {
+    <div class="error-body">
+      <svg lucideSearch size="48px" color="var(--accent)" strokeWidth="1.5px"></svg>
+      <p class="text-2xl font-bold text-(--text) text-center">Project not selected</p>
+      <p class="text-(--text-2) w-100 text-center">Pick a project from the sidebar or start a fresh analysis from a URL or HAR file.</p>
+      <div class="flex gap-4 navbar-close-open-button">
+        <button class="btn btn-primary" (click)="openNewProject()">New project</button>
+        <button class="btn" (click)="openNavLeft()">Go to saved projects</button>
+      </div>
+    </div>
+  } @else {
+    <div class="error-body">
+      <div class="error-body">
+        <svg lucideSearch size="48px" color="var(--accent)" strokeWidth="1.5px"></svg>
+        <p class="text-2xl font-bold text-(--text) text-center">Project not found</p>
+        <p class="text-(--text-2) w-100 text-center">Pick a project from the sidebar or start a fresh analysis from a URL or HAR file.</p>
+        <div class="flex gap-4 navbar-close-open-button">
+          <button class="btn btn-primary" (click)="openNewProject()">New project</button>
+          <button class="btn" (click)="openNavLeft()">Go to saved projects</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
 
-{{projectId()}}
+<!---->
+
+<!--{{projectId()}}-->
+
+
+
