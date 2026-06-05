@@ -13,7 +13,7 @@
   }
 
   <app-nav-left class="nav-left" [projectId]="projectId()" (openNewProject)="openNewProject()" (openSettingsOutput)="setSettingsOpen(true)" [class.open]="isNavLeftOpen()" (closeNavLeftOutput)="setNavLeft(false)"></app-nav-left>
-  <app-project class="project" [projectId]="projectId()" (openNavLeftOutput)="setNavLeft(true)"></app-project>
+  <app-project class="project" [projectId]="projectId()" (openNavLeftOutput)="setNavLeft(true)" (openNewProjectOutput)="openNewProject()"></app-project>
 
 
 <!--  <div class="popup settings" [class.active]="isSettingsOpen()">-->
