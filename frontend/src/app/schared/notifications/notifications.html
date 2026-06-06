@@ -1,0 +1,21 @@
+<div class="notifications" role="status" aria-live="polite">
+  @for (n of notificationService.notifications(); track n.id) {
+    <div class="notification" [class.success]="n.type === 'success'" [class.error]="n.type === 'error'" [class.info]="n.type === 'info'">
+      @switch (n.type) {
+        @case ('success') {
+          <svg lucideCircleCheck size="18"></svg>
+        }
+        @case ('error') {
+          <svg lucideCircleX size="18"></svg>
+        }
+        @default {
+          <svg lucideInfo size="18"></svg>
+        }
+      }
+      <p class="message">{{ n.message }}</p>
+      <button class="dismiss" type="button" aria-label="Dismiss notification" (click)="dismiss(n.id)">
+        <svg lucideX size="16"></svg>
+      </button>
+    </div>
+  }
+</div>

@@ -32,6 +32,7 @@ export class Projects implements OnDestroy, OnInit {
   isSettingsOpen = signal(false);
   isNewProjectOpen = signal(false);
   isChangePasswordOpen = signal(false);
+  projectsError = signal('');
   projectId = input()
   private resizeSub = fromEvent(window, 'resize').pipe(
     map(() => window.innerWidth < 768)
@@ -39,7 +40,14 @@ export class Projects implements OnDestroy, OnInit {
   projectService = inject(ProjectsService)
 
   ngOnInit(): void {
-    this.projectService.getProjects().subscribe()
+    this.projectService.getProjects().subscribe({
+      next: res => {
+        if (!res.isSuccess) {
+          this.projectsError.set(res.message)
+        }
+      },
+      error: () => this.projectsError.set('Could not load projects.'),
+    })
   }
 
   ngOnDestroy() {

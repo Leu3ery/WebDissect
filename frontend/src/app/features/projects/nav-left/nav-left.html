@@ -10,11 +10,18 @@
       <p class="text-xs text-(--text-2)">PROJECTS</p>
       <p class="text-xs text-(--text-2)">{{projectService.projects().length}}</p>
     </div>
+    @if (projectsError().length > 0) {
+      <div class="error-field">{{projectsError()}}</div>
+    }
     @for (p of projectService.projects(); track p.id) {
       <button [class.active]="projectId() == p.id" (click)="openProject(p.id)" class="project">
         <p>{{p.name}}</p>
         <p class="text-(--text-2)">{{p.domain}}</p>
       </button>
+    } @empty {
+      @if (projectsError().length === 0) {
+        <p class="text-(--text-2) text-xs text-center mt-2">No projects yet</p>
+      }
     }
   </div>
   <div class="p-4">
