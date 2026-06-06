@@ -29,7 +29,7 @@
     @if (error().length > 0) {
       <div class="error-field">{{error()}}</div>
     }
-    <button [disabled]="form.invalid || error().length > 0" class="btn btn-primary mt-4 w-full" type="submit">Go to analyse</button>
+    <button [disabled]="form.invalid || loading()" class="btn btn-primary mt-4 w-full" type="submit">{{ loading() ? 'Creating…' : 'Go to analyse' }}</button>
   </form>
 </div>
 

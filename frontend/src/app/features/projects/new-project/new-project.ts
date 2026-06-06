@@ -21,6 +21,7 @@ export class NewProject {
   projectService = inject(ProjectsService)
   router = inject(Router)
   error = signal('')
+  loading = signal(false)
 
   fb = new FormBuilder();
   form = this.fb.group({
@@ -46,7 +47,7 @@ export class NewProject {
   }
 
   createNewProject() {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.loading()) {
       return
     }
 
@@ -54,15 +55,25 @@ export class NewProject {
     const project: ProjectCreateI = {
       name: name!,
       domain: domain!,
-      har: this.selectedFile() ?? undefined,
     }
-    this.projectService.createProject(project).subscribe(res => {
-      if (!res.isSuccess) {
-        this.error.set(res.message)
-      } else {
-        this.router.navigate(['/projects', res.data.id])
-        this.closeProject.emit()
-      }
+
+    this.error.set('')
+    this.loading.set(true)
+    this.projectService.createProjectWithAnalysis(project, this.selectedFile()).subscribe({
+      next: res => {
+        this.loading.set(false)
+        if (!res.isSuccess) {
+          this.error.set(res.message)
+        } else {
+          this.projectService.getProjects().subscribe()
+          this.router.navigate(['/projects', res.data.id])
+          this.closeProject.emit()
+        }
+      },
+      error: () => {
+        this.loading.set(false)
+        this.error.set('Could not create project. Please try again.')
+      },
     })
   }
 }
