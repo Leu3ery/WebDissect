@@ -2,7 +2,7 @@ import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {ApiResponse} from '../../core/model/ApiResponse';
 import {config} from '../../core/config';
-import {map, Observable, of, switchMap, tap} from 'rxjs';
+import {delay, map, Observable, of, switchMap, tap} from 'rxjs';
 
 export interface ProjectI {
   id: number;
@@ -89,7 +89,7 @@ export class ProjectsService {
       ],
       message: "test",
       isSuccess: true,
-    }).pipe(tap(res => {
+    }).pipe(delay(400), tap(res => {
       if (res.isSuccess) {
         this._projects.set(res.data)
       }
@@ -103,7 +103,7 @@ export class ProjectsService {
         data: null as unknown as ProjectFullI,
         message: "Project not found",
         isSuccess: false,
-      })
+      }).pipe(delay(400))
     }
     return of<ApiResponse<ProjectFullI>>({
       data: {
@@ -147,7 +147,7 @@ export class ProjectsService {
       },
       message: "test",
       isSuccess: true,
-    })
+    }).pipe(delay(400))
   }
 
   createProject(project: ProjectCreateI): Observable<ApiResponse<ProjectI>> {
@@ -156,14 +156,14 @@ export class ProjectsService {
       data: {id: 2, name: project.name, domain: project.domain, user_id: 1},
       message: "test",
       isSuccess: true,
-    })
+    }).pipe(delay(400))
   }
 
   uploadHar(id: number, har: File): Observable<ApiResponse<null>> {
     // const formData = new FormData();
     // formData.append('file', har);
     // return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/upload`, formData);
-    return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true})
+    return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true}).pipe(delay(400))
   }
 
   updateProject(id: number, project: ProjectUpdateI): Observable<ApiResponse<ProjectI>> {
@@ -172,12 +172,12 @@ export class ProjectsService {
       data: {id, name: project.name ?? "project 1", domain: project.domain ?? "test.com", user_id: 1},
       message: "test",
       isSuccess: true,
-    })
+    }).pipe(delay(400))
   }
 
   startAnalysis(id: number): Observable<ApiResponse<null>> {
     // return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/analysis/start`, {});
-    return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true})
+    return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true}).pipe(delay(400))
   }
 
   // Creating a project is a 3-step flow: create the project, upload the HAR

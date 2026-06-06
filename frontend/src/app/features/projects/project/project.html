@@ -1,12 +1,20 @@
 <div class="flex w-full h-full flex-col">
   @if (project()) {
     <div class="header">
-<!--      {{project() | json}}-->
       <div>
         <p class="text-lg">{{project()?.name}}</p>
         <p class="text-(--text-2)">https://{{project()?.domain}}</p>
       </div>
-      <svg lucideMenu class="navbar-close-open-button" (click)="openNavLeft()"></svg>
+      <div class="flex items-center gap-2">
+        <input #harInput class="hidden" type="file" accept=".har" (change)="onHarSelected($event)">
+        <button class="btn" type="button" [disabled]="uploading()" (click)="harInput.click()">
+          <svg lucideUpload size="16"></svg> {{ uploading() ? 'Uploading…' : 'Upload HAR' }}
+        </button>
+        <button class="btn btn-primary" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
+          <svg lucidePlay size="16"></svg> {{ analyzing() ? 'Running…' : 'Run Analysis' }}
+        </button>
+        <svg lucideMenu class="navbar-close-open-button" (click)="openNavLeft()"></svg>
+      </div>
     </div>
   }
   @if (project()) {
