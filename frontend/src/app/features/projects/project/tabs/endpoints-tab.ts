@@ -1,0 +1,90 @@
+import {ChangeDetectionStrategy, Component, computed, input, signal} from '@angular/core';
+import {LucideSearch} from '@lucide/angular';
+import {EndpointI} from '../../projects-service';
+
+@Component({
+  selector: 'app-endpoints-tab',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {class: 'flex flex-col flex-1 min-h-0'},
+  imports: [LucideSearch],
+  template: `
+    <div class="flex flex-col flex-1 min-h-0">
+      <div class="flex gap-2 items-center px-3 md:px-5 pt-3 md:pt-4">
+        <div class="relative flex-1" style="max-width:360px">
+          <svg lucideSearch size="14" class="absolute text-(--text-2)" style="left:11px;top:50%;transform:translateY(-50%)"></svg>
+          <input class="input mono" placeholder="Filter by method, path, status…"
+                 style="padding-left:34px;font-size:12.5px" [value]="query()" (input)="onSearch($event)">
+        </div>
+        <span class="mono text-(--text-2)" style="font-size:11px">{{ rows().length }} / {{ endpoints().length }}</span>
+      </div>
+      <div class="flex-1 overflow-auto p-3 md:p-5">
+        <div class="card overflow-hidden">
+          <table class="dt">
+            <thead>
+              <tr>
+                <th style="width:90px">Method</th>
+                <th>Path</th>
+                <th style="width:90px">Status</th>
+                <th style="width:200px">Content-Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of rows(); track r.id) {
+                <tr>
+                  <td data-label="Method"><span [class]="'badge ' + methodColor(r.method)" style="min-width:56px;justify-content:center">{{ r.method }}</span></td>
+                  <td style="word-break:break-all" data-label="Path">{{ r.path }}</td>
+                  <td data-label="Status">
+                    <span class="mono inline-flex items-center gap-2" style="font-size:12px;font-weight:600"
+                          [style.color]="statusColor(r.status)">
+                      <span [class]="'dot ' + statusDot(r.status)"></span>{{ r.status }}
+                    </span>
+                  </td>
+                  <td class="muted" data-label="Content-Type">{{ r.content_type }}</td>
+                </tr>
+              } @empty {
+                <tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No endpoints</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `,
+})
+export class EndpointsTab {
+  endpoints = input<EndpointI[]>([]);
+  query = signal('');
+
+  rows = computed(() => {
+    const q = this.query().toLowerCase().trim();
+    if (!q) return this.endpoints();
+    return this.endpoints().filter(e =>
+      e.path.toLowerCase().includes(q) ||
+      String(e.status).includes(q) ||
+      e.method.toLowerCase().includes(q));
+  });
+
+  onSearch(event: Event) {
+    this.query.set((event.target as HTMLInputElement).value);
+  }
+
+  methodColor(method: string): string {
+    if (method === 'GET') return 'cyan';
+    if (method === 'POST') return 'yellow';
+    if (method === 'PUT') return 'violet';
+    if (method === 'DELETE') return 'red';
+    return 'gray';
+  }
+
+  statusDot(status: number): string {
+    if (status >= 200 && status < 300) return 'green';
+    if (status >= 400) return 'red';
+    return 'gray';
+  }
+
+  statusColor(status: number): string {
+    if (status >= 200 && status < 300) return 'var(--accent-2)';
+    if (status >= 400) return 'var(--danger)';
+    return 'var(--text-2)';
+  }
+}

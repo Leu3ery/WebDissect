@@ -19,6 +19,7 @@
 
 .project {
   flex: 1;
+  min-width: 0;
   background-color: var(--panel-3);
 }
 
