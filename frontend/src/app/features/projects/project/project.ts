@@ -2,10 +2,10 @@ import {Component, effect, inject, input, numberAttribute, output, signal} from 
 import {ProjectsService, ProjectFullI} from '../projects-service';
 import {LucideActivity, LucideGlobe, LucideLayers, LucideMenu, LucidePlay, LucideSearch, LucideShieldCheck, LucideUpload} from '@lucide/angular';
 import {NotificationService} from '../../../schared/notifications/notification-service';
-import {DnsTab} from './tabs/dns-tab';
-import {TechTab} from './tabs/tech-tab';
-import {EndpointsTab} from './tabs/endpoints-tab';
-import {SslTab} from './tabs/ssl-tab';
+import {DnsTab} from './tabs/dns-tab/dns-tab';
+import {TechTab} from './tabs/tech-tab/tech-tab';
+import {EndpointsTab} from './tabs/endpoints-tab/endpoints-tab';
+import {SslTab} from './tabs/ssl-tab/ssl-tab';
 
 type TabId = 'dns' | 'tech' | 'ep' | 'ssl';
 
