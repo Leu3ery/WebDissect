@@ -22,6 +22,7 @@ export class NavLeft {
   openSettingsOutput = output()
   openNewProject = output()
   projectId = input()
+  projectsError = input('')
 
 
   closeNavLeft() {
