@@ -134,9 +134,9 @@ export class ProjectsService {
           {id: 4, type: "TXT", domain: "test.com", value: "v=spf1 include:_spf.test.com ~all", ttl: 3600},
         ],
         technologies: [
-          {id: 1, name: "Nginx", description: "Web server", icon_url: "https://cdn.test.com/icons/nginx.svg"},
-          {id: 2, name: "React", description: "Frontend library", icon_url: "https://cdn.test.com/icons/react.svg"},
-          {id: 3, name: "Cloudflare", description: "CDN / WAF", icon_url: "https://cdn.test.com/icons/cloudflare.svg"},
+          {id: 1, name: "Nginx", description: "Web server", icon_url: "https://icon.icepanel.io/Technology/svg/NGINX.svg"},
+          {id: 2, name: "React", description: "Frontend library", icon_url: "https://icon.icepanel.io/Technology/svg/React.svg"},
+          {id: 3, name: "Cloudflare", description: "CDN / WAF", icon_url: "https://icon.icepanel.io/Technology/svg/Cloudflare.svg"},
         ],
         endpoints: [
           {id: 1, method: "GET", path: "/", status: 200, content_type: "text/html"},

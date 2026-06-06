@@ -1,25 +1,46 @@
 <div class="flex w-full h-full flex-col">
   @if (project()) {
     <div class="header">
-      <div>
-        <p class="text-lg">{{project()?.name}}</p>
-        <p class="text-(--text-2)">https://{{project()?.domain}}</p>
+      <div class="min-w-0 flex-1">
+        <p class="text-lg truncate">{{project()?.name}}</p>
+        <p class="text-(--text-2) truncate">https://{{project()?.domain}}</p>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <input #harInput class="hidden" type="file" accept=".har" (change)="onHarSelected($event)">
         <button class="btn" type="button" [disabled]="uploading()" (click)="harInput.click()">
-          <svg lucideUpload size="16"></svg> {{ uploading() ? 'Uploading…' : 'Upload HAR' }}
+          <svg lucideUpload size="16"></svg>
+          <span class="hidden md:inline">{{ uploading() ? 'Uploading…' : 'Upload HAR' }}</span>
         </button>
         <button class="btn btn-primary" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
-          <svg lucidePlay size="16"></svg> {{ analyzing() ? 'Running…' : 'Run Analysis' }}
+          <svg lucidePlay size="16"></svg>
+          <span class="hidden md:inline">{{ analyzing() ? 'Running…' : 'Run Analysis' }}</span>
         </button>
         <svg lucideMenu class="navbar-close-open-button" (click)="openNavLeft()"></svg>
       </div>
     </div>
   }
-  @if (project()) {
-    <div class="body">
-      {{project() | json}}
+  @if (project(); as p) {
+    <div class="tabs px-3 md:px-5">
+      <button type="button" class="tab" [class.active]="activeTab() === 'dns'" (click)="activeTab.set('dns')">
+        <svg lucideGlobe size="14"></svg> DNS <span class="count">{{ p.dns_entries.length }}</span>
+      </button>
+      <button type="button" class="tab" [class.active]="activeTab() === 'tech'" (click)="activeTab.set('tech')">
+        <svg lucideLayers size="14"></svg> Tech Stack <span class="count">{{ p.technologies.length }}</span>
+      </button>
+      <button type="button" class="tab" [class.active]="activeTab() === 'ep'" (click)="activeTab.set('ep')">
+        <svg lucideActivity size="14"></svg> Endpoints <span class="count">{{ p.endpoints.length }}</span>
+      </button>
+      <button type="button" class="tab" [class.active]="activeTab() === 'ssl'" (click)="activeTab.set('ssl')">
+        <svg lucideShieldCheck size="14"></svg> SSL/TLS <span class="count">{{ p.certificates.length }}</span>
+      </button>
+    </div>
+    <div class="flex flex-col flex-1 min-h-0">
+      @switch (activeTab()) {
+        @case ('dns') { <app-dns-tab [entries]="p.dns_entries" /> }
+        @case ('tech') { <app-tech-tab [technologies]="p.technologies" /> }
+        @case ('ep') { <app-endpoints-tab [endpoints]="p.endpoints" /> }
+        @case ('ssl') { <app-ssl-tab [certificates]="p.certificates" /> }
+      }
     </div>
   } @else if (!projectId()) {
     <div class="error-body">
