@@ -4,12 +4,11 @@
       <!-- Summary -->
       <div class="card" style="padding:18px">
         <div class="flex items-center gap-2" style="margin-bottom:14px">
-          <svg lucideShieldCheck size="18" color="var(--accent-2)"></svg>
           <span style="font-weight:600;font-size:14px">Certificate</span>
           @if (daysLeft(c) > 0) {
             <span class="badge green"><span class="dot green"></span> Valid</span>
           } @else {
-            <span class="badge red"><span class="dot red"></span> Expired</span>
+            <span class="badge red"> Expired</span>
           }
         </div>
         <div class="grid" style="grid-template-columns:auto 1fr;gap:8px 18px;font-size:13px">
@@ -61,14 +60,14 @@
           <div class="mono text-(--text-2)" style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Leaf</div>
           <div style="font-weight:600;font-size:13.5px">{{ c.subject_domain }}</div>
           <div class="text-(--text-2)" style="font-size:12px;margin-top:2px">{{ c.subject_organization }}</div>
-          <svg lucideCheck size="14" color="var(--accent-2)" class="absolute" style="top:10px;right:10px"></svg>
+<!--          <svg lucideCheck size="14" color="var(&#45;&#45;accent-2)" class="absolute" style="top:10px;right:10px"></svg>-->
         </div>
         <svg lucideChevronRight size="16" color="var(--text-2)" class="self-center rotate-90 md:rotate-0"></svg>
         <div class="relative flex-1" style="padding:14px;background:var(--panel-3);border:1px solid var(--border);border-radius:10px">
           <div class="mono text-(--text-2)" style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Issuer</div>
           <div style="font-weight:600;font-size:13.5px">{{ c.issuer_name }}</div>
           <div class="text-(--text-2)" style="font-size:12px;margin-top:2px">{{ c.issuer_organization }} ({{ c.issuer_country }})</div>
-          <svg lucideCheck size="14" color="var(--accent-2)" class="absolute" style="top:10px;right:10px"></svg>
+<!--          <svg lucideCheck size="14" color="var(&#45;&#45;accent-2)" class="absolute" style="top:10px;right:10px"></svg>-->
         </div>
       </div>
     </div>
