@@ -15,3 +15,5 @@ sqlalchemy
 pydantic
 pydantic-settings
 
+# Tools
+dnspython
