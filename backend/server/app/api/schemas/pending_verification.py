@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class PendingVerification(BaseModel):
-    id: int              = Field(description="")
+    id: int | None       = Field(description="")
     email: str           = Field(description="Email address that received the verification code")
     code: str            = Field(description="Verification Code")
     expires_at: datetime = Field(description="")
