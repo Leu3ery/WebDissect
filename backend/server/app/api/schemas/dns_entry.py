@@ -7,11 +7,12 @@ class EntryType(StrEnum):
     MX = "MX"
     NS = "NS"
     TXT = "TXT"
-    # TODO
+    SOA = "SOA"
+    SRV = "SRV"
 
 
 class DNSEntry(BaseModel):
-    id: int | None  = Field(description="id of DNS entry in the DB")
+    id: int | None  = Field(description="id of DNS entry in the DB", default=None)
     type: EntryType = Field(description="")
     domain: str     = Field(description="")
     value: str      = Field(description="Text value of the DNS entry")
