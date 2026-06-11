@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime
 import datetime
 
+from sqlalchemy.orm import relationship
+
 from ._base import Base
 
 
@@ -12,4 +14,4 @@ class User(Base):
     password_hash = Column(String(200), nullable=False)
     created_at    = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
 
-
+    projects = relationship("Project", back_populates="user")

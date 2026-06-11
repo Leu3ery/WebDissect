@@ -12,6 +12,6 @@ class Project(Base):
     domain  = Column(String(253), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    user = relationship("User", back_populates="project")
-
+    user         = relationship("User", back_populates="projects")
+    project_hars = relationship("ProjectHar", back_populates="project")
 
