@@ -26,6 +26,15 @@ class Project(Base):
     endpoints = relationship(
         "Endpoint", back_populates="project", cascade="all, delete-orphan"
     )
+    subdomains = relationship(
+        "Subdomain", back_populates="project", cascade="all, delete-orphan"
+    )
+    ports = relationship(
+        "Port", back_populates="project", cascade="all, delete-orphan"
+    )
+    path_entries = relationship(
+        "PathEntry", back_populates="project", cascade="all, delete-orphan"
+    )
     hars = relationship(
         "ProjectHar", back_populates="project", cascade="all, delete-orphan"
     )

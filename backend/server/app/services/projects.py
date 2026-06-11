@@ -196,38 +196,6 @@ def _hostname(domain: str) -> str:
 
 
 def build_full(project: Project) -> ProjectFull:
-    return ProjectFull(
-        id=project.id,
-        name=project.name,
-        domain=project.domain,
-        user_id=project.user_id,
-        certificates=[Certificate_to(c) for c in project.certificates],
-        dns_entries=[DNS_to(d) for d in project.dns_entries],
-        technologies=[Tech_to(t) for t in project.technologies],
-        endpoints=[Endpoint_to(e) for e in project.endpoints],
-    )
-
-
-# Local import-free ORM -> schema helpers (avoid nested from_attributes surprises)
-def Certificate_to(c):
-    from app.api.schemas.certificate import Certificate as S
-
-    return S.model_validate(c)
-
-
-def DNS_to(d):
-    from app.api.schemas.dns_entry import DNSEntry as S
-
-    return S.model_validate(d)
-
-
-def Tech_to(t):
-    from app.api.schemas.technology import Technology as S
-
-    return S.model_validate(t)
-
-
-def Endpoint_to(e):
-    from app.api.schemas.endpoint import Endpoint as S
-
-    return S.model_validate(e)
+    # All nested schemas enable from_attributes, so a single validate maps the
+    # ORM project + its relationship collections onto the response model.
+    return ProjectFull.model_validate(project)

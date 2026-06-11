@@ -58,6 +58,27 @@ Base path: `/api`. Every response uses the envelope
 | GET | `/projects/{id}` | ✓ | Project + DNS / certs / tech / endpoints |
 | PATCH | `/projects/{id}` | ✓ | Update name / domain |
 | POST | `/projects/{id}/upload` | ✓ | Upload a HAR file (≤ 10 MB) |
-| POST | `/projects/{id}/analysis/start` | ✓ | Run the analysis |
+| POST | `/projects/{id}/analysis/start` | ✓ | Start passive analysis (runs in background) |
+| POST | `/projects/{id}/scan/ports` | ✓ | Opt-in TCP port scan + banner grab |
+| POST | `/projects/{id}/scan/paths` | ✓ | Opt-in path/directory enumeration |
+| WS | `/projects/{id}/analysis/ws?token=…` | ✓ | Live analysis progress stream |
 
 Interactive OpenAPI docs are available at `/docs` on the backend.
+
+## Analysis features
+
+- **Passive** (`analysis/start`): DNS records, TLS certificate, technology
+  fingerprinting (headers/HTML, with versions) and subdomains via crt.sh, plus
+  endpoints from uploaded HAR files. Results stream live over the WebSocket.
+- **Active, opt-in**: TCP port scan with banner grabbing + service/version
+  detection (`scan/ports`), and path/directory enumeration (`scan/paths`).
+- Auth endpoints are protected by an in-memory per-IP rate limiter.
+
+## Tests
+
+```bash
+cd backend/server
+pip install -r requirements-dev.txt
+python -m pytest                 # 32 tests
+python -m pytest --cov=app       # coverage report
+```

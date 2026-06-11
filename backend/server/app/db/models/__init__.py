@@ -8,6 +8,9 @@ from .certificate import Certificate
 from .dns_entry import DNSEntry
 from .technology import Technology
 from .endpoint import Endpoint
+from .subdomain import Subdomain
+from .port import Port
+from .path_entry import PathEntry
 
 __all__ = [
     "Base",
@@ -20,4 +23,7 @@ __all__ = [
     "DNSEntry",
     "Technology",
     "Endpoint",
+    "Subdomain",
+    "Port",
+    "PathEntry",
 ]

@@ -5,6 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.api.schemas.certificate import Certificate
 from app.api.schemas.dns_entry import DNSEntry
 from app.api.schemas.endpoint import Endpoint
+from app.api.schemas.path_entry import PathEntry
+from app.api.schemas.port import Port
+from app.api.schemas.subdomain import Subdomain
 from app.api.schemas.technology import Technology
 
 
@@ -34,3 +37,6 @@ class ProjectFull(ProjectRead):
     dns_entries: list[DNSEntry] = Field(default_factory=list)
     technologies: list[Technology] = Field(default_factory=list)
     endpoints: list[Endpoint] = Field(default_factory=list)
+    subdomains: list[Subdomain] = Field(default_factory=list)
+    ports: list[Port] = Field(default_factory=list)
+    path_entries: list[PathEntry] = Field(default_factory=list)

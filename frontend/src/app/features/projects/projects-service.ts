@@ -49,11 +49,39 @@ export interface EndpointI {
   content_type: string;
 }
 
+export interface SubdomainI {
+  id: number;
+  name: string;
+  ip: string;
+  source: string;
+}
+
+export interface PortI {
+  id: number;
+  port: number;
+  protocol: string;
+  state: string;
+  service: string;
+  version: string;
+  banner: string;
+}
+
+export interface PathEntryI {
+  id: number;
+  path: string;
+  status: number;
+  content_type: string;
+  length: number;
+}
+
 export interface ProjectFullI extends ProjectI {
   certificates: CertificateI[];
   dns_entries: DnsEntryI[];
   technologies: TechnologyI[];
   endpoints: EndpointI[];
+  subdomains: SubdomainI[];
+  ports: PortI[];
+  path_entries: PathEntryI[];
 }
 
 export interface ProjectCreateI {
@@ -104,6 +132,14 @@ export class ProjectsService {
 
   startAnalysis(id: number): Observable<ApiResponse<null>> {
     return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/analysis/start`, {});
+  }
+
+  scanPorts(id: number): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/scan/ports`, {});
+  }
+
+  scanPaths(id: number): Observable<ApiResponse<null>> {
+    return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/scan/paths`, {});
   }
 
   // Creating a project is a 3-step flow: create the project, upload the HAR
