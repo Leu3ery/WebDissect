@@ -16,6 +16,17 @@ def get_resolver():
     return resolver
 
 
+
+def _dedupe_dns_entries(entries: list[DNSEntry]) -> list[DNSEntry]:
+    seen: dict[tuple, DNSEntry] = {}
+    for e in entries:
+        key = (e.type, e.domain, e.value)
+        seen.setdefault(key, e)
+    return list(seen.values())
+
+
+
+
 def _query(domain: str, record_type: EntryType, service: str | None = None, proto: Literal["tcp", "udp"] | None = None) -> list[DNSEntry]:
     """
     Execute a DNS query
