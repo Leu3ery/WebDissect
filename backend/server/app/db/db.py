@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -13,9 +14,19 @@ def init_db():
     Base.metadata.create_all(engine)
 
 
-def get_db():
+@contextmanager
+def session_scope():
     db = SessionLocal()
     try:
         yield db
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
+
+def get_db():
+    with session_scope() as db:
+        yield db
+
