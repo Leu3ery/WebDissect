@@ -15,7 +15,6 @@ def get_resolver():
     return resolver
 
 
-# TODO: CNAME / PTR
 def _query(domain: str, record_type: EntryType, service: str | None = None, proto: Literal["tcp", "udp"] | None = None) -> list[DNSEntry]:
     """
     Execute a DNS query
