@@ -5,6 +5,7 @@ from dns.resolver import Resolver, NoAnswer, NXDOMAIN, NoNameservers
 from dns.exception import Timeout
 
 from app.api.schemas.dns_entry import DNSEntry, EntryType
+from app.tools._dns_mappings import SRV_MAPPING
 
 
 @lru_cache
@@ -76,4 +77,14 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
         return []
     return entries
 
+
+
+def _brute_srv(domain: str) -> list[DNSEntry]:
+    entries: list[DNSEntry] = []
+
+    for category, data in SRV_MAPPING.items():
+        for service, proto in data:
+            entries.extend(_query(domain, EntryType.SRV, service, proto))
+
+    return entries
 
