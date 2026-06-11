@@ -46,7 +46,7 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
                     data = rdata.address
                 case EntryType.MX:
                     data = f"Preference: {rdata.preference}, Mail Domain: {rdata.exchange}"  # 10  mail.example.com.
-                case EntryType.NS:
+                case EntryType.NS | EntryType.CNAME:
                     data = str(rdata.target)  # ns1.example.com.
                 case EntryType.TXT:
                     data = b"".join(rdata.strings).decode()
@@ -76,18 +76,5 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
     except (NoAnswer, NXDOMAIN, NoNameservers, Timeout):
         return []
     return entries
-
-
-
-
-if __name__ == "__main__":
-    for type_ in [EntryType.IPv4, EntryType.IPv6, EntryType.MX, EntryType.NS, EntryType.TXT, EntryType.SOA]:
-        entries = _query(domain="hypixel.net", record_type=type_)
-        for entry in entries:
-            print(entry.type.ljust(5), entry.value)
-
-    entries = _query(domain="hypixel.net", record_type=EntryType.SRV, service="minecraft", proto="tcp")
-    for entry in entries:
-        print(entry.type.ljust(5), entry.value)
 
 

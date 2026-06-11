@@ -9,6 +9,7 @@ class EntryType(StrEnum):
     TXT = "TXT"
     SOA = "SOA"
     SRV = "SRV"
+    CNAME = "CNAME"
 
 
 class DNSEntry(BaseModel):
