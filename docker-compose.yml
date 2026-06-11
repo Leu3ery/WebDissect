@@ -6,15 +6,19 @@ services:
             -   "./db:/app/db"
         env_file:
             -  ".env"
+        environment:
+            ENV: "production"
         build:
             context: .
             dockerfile: backend/server/Dockerfile
+        restart: unless-stopped
+
     frontend-server:
-        expose:
-            - "80"
+        ports:
+            - "8080:80"
         build:
             context: ./frontend
             dockerfile: Dockerfile
         depends_on:
             -   backend-server
-
+        restart: unless-stopped

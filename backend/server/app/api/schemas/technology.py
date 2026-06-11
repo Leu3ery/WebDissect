@@ -1,9 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 class Technology(BaseModel):
-    id: int          = Field(description="Internal technology ID")
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None   = Field(default=None, description="Internal technology ID")
     name: str        = Field(description="Human readable technology name")
-    description: str = Field(description="Technology description")
-    icon_url: str    = Field(description="Icon URL")
+    description: str = Field(default="", description="Technology description")
+    icon_url: str    = Field(default="", description="Icon URL")
 
 

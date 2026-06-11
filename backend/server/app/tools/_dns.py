@@ -82,6 +82,35 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
 
 
 
+_DEFAULT_TYPES = [
+    EntryType.IPv4,
+    EntryType.IPv6,
+    EntryType.MX,
+    EntryType.NS,
+    EntryType.TXT,
+    EntryType.SOA,
+]
+
+
+def _hostname(domain: str) -> str:
+    if "://" in domain:
+        domain = urlparse(domain).netloc or domain
+    return domain.strip().strip("/")
+
+
+def collect_dns(domain: str, types: list[EntryType] | None = None) -> list[DNSEntry]:
+    """Query a domain for the common DNS record types and return all entries."""
+    host = _hostname(domain)
+    entries: list[DNSEntry] = []
+    for record_type in (types or _DEFAULT_TYPES):
+        try:
+            entries.extend(_query(domain=host, record_type=record_type))
+        except Exception:
+            # One failing record type must not abort the whole lookup.
+            continue
+    return entries
+
+
 if __name__ == "__main__":
     for type_ in [EntryType.IPv4, EntryType.IPv6, EntryType.MX, EntryType.NS, EntryType.TXT, EntryType.SOA]:
         entries = _query(domain="lernkaro.at", record_type=type_)

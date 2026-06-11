@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from enum import StrEnum
 
 class EntryType(StrEnum):
@@ -12,6 +12,8 @@ class EntryType(StrEnum):
 
 
 class DNSEntry(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int | None  = Field(description="id of DNS entry in the DB", default=None)
     type: EntryType = Field(description="")
     domain: str     = Field(description="")

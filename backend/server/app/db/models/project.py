@@ -12,6 +12,20 @@ class Project(Base):
     domain  = Column(String(253), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    user = relationship("User", back_populates="project")
+    user = relationship("User", back_populates="projects")
 
-
+    certificates = relationship(
+        "Certificate", back_populates="project", cascade="all, delete-orphan"
+    )
+    dns_entries = relationship(
+        "DNSEntry", back_populates="project", cascade="all, delete-orphan"
+    )
+    technologies = relationship(
+        "Technology", back_populates="project", cascade="all, delete-orphan"
+    )
+    endpoints = relationship(
+        "Endpoint", back_populates="project", cascade="all, delete-orphan"
+    )
+    hars = relationship(
+        "ProjectHar", back_populates="project", cascade="all, delete-orphan"
+    )
