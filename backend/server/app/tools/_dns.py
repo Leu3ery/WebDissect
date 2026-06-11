@@ -32,9 +32,8 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
     entries = []
     try:
         if record_type == EntryType.SRV:
-            if "://" not in domain:
-                domain = "//" + domain
-            label = f"_{service}._{proto}.{urlparse(domain).netloc}"
+            new = domain if "//" in domain else f"//{domain}"
+            label = f"_{service}._{proto}.{urlparse(new).netloc}"
             resp = get_resolver().resolve(label, "SRV")
         else:
             resp = get_resolver().resolve(domain, record_type)
@@ -83,11 +82,11 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
 
 if __name__ == "__main__":
     for type_ in [EntryType.IPv4, EntryType.IPv6, EntryType.MX, EntryType.NS, EntryType.TXT, EntryType.SOA]:
-        entries = _query(domain="lernkaro.at", record_type=type_)
+        entries = _query(domain="hypixel.net", record_type=type_)
         for entry in entries:
             print(entry.type.ljust(5), entry.value)
 
-    entries = _query(domain="lernkaro.at", record_type=EntryType.SRV, service="minecraft", proto="tcp")
+    entries = _query(domain="hypixel.net", record_type=EntryType.SRV, service="minecraft", proto="tcp")
     for entry in entries:
         print(entry.type.ljust(5), entry.value)
 
