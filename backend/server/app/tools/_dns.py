@@ -1,16 +1,15 @@
 from urllib.parse import urlparse
 from functools import lru_cache
-import dns
-from dns.resolver import NoAnswer, NXDOMAIN, NoNameservers
-from dns.exception import Timeout
 from typing import Literal
+from dns.resolver import Resolver, NoAnswer, NXDOMAIN, NoNameservers
+from dns.exception import Timeout
 
 from app.api.schemas.dns_entry import DNSEntry, EntryType
 
 
 @lru_cache
 def get_resolver():
-    resolver = dns.resolver.Resolver()
+    resolver = Resolver()
     resolver.nameservers = ["1.1.1.1"]
     resolver.timeout = 5
     return resolver
@@ -35,7 +34,7 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
         if record_type == EntryType.SRV:
             if "://" not in domain:
                 domain = "//" + domain
-            label = f"_{service}._{proto}._{urlparse(domain).netloc}"
+            label = f"_{service}._{proto}.{urlparse(domain).netloc}"
             resp = get_resolver().resolve(label, "SRV")
         else:
             resp = get_resolver().resolve(domain, record_type)
