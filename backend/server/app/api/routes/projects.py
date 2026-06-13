@@ -22,7 +22,7 @@ DNS_ENTRY_TYPES = [
 
 # ~~~~~~~~~~ # Utility functions # ~~~~~~~~~~ #
 
-def _fetch_dns(domain: str):
+def _fetch_dns(domain: str, analysis_id: int):
     entries: list[DNSEntry] = []
 
     for entry_type in DNS_ENTRY_TYPES:
@@ -44,7 +44,12 @@ def _fetch_dns(domain: str):
             ))
 
 
-def _fetch_cert(domain: str):
+    # Mark DNS Analysis as completed
+    with db_handler.transaction() as db:
+        db.get(Analysis, analysis_id).is_dns_analysis_completed = True
+
+
+def _fetch_cert(domain: str, analysis_id: int):
     # TODO: handle exceptions
     raw_cert = fetch_cert(domain)
     cert = parse_cert(raw_cert)
@@ -54,6 +59,10 @@ def _fetch_cert(domain: str):
         db.query(Certificate).delete(synchronize_session=False)
         db.add(cert)
 
+
+    # Mark Certificate Analysis as completed
+    with db_handler.transaction() as db:
+        db.get(Analysis, analysis_id).is_certificate_analysis_completed = True
 
 
 
@@ -118,7 +127,7 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
 
 
     # Start analysis and return analysis id
-    bg.add_task(_fetch_dns, project_domain)
-    bg.add_task(_fetch_cert, project_domain)
+    bg.add_task(_fetch_dns, project_domain, analysis_id)
+    bg.add_task(_fetch_cert, project_domain, analysis_id)
     return BaseResponse(data={"analysisId" : analysis_id})
 
