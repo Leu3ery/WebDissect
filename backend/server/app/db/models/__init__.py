@@ -1,4 +1,5 @@
 from ._base import Base
+from .analysis import Analysis
 from .certificate import Certificate
 from .dns_entry import DNSEntry
 from .endpoint import Endpoint
