@@ -4,7 +4,8 @@ from typing import Literal
 from dns.resolver import Resolver, NoAnswer, NXDOMAIN, NoNameservers
 from dns.exception import Timeout
 
-from app.api.schemas.dns_entry import DNSEntry, EntryType
+from app.api.schemas import DNSEntry, DNSEntryType
+from app.tools._dns_mappings import SRV_MAPPING
 
 
 @lru_cache
@@ -15,7 +16,18 @@ def get_resolver():
     return resolver
 
 
-def _query(domain: str, record_type: EntryType, service: str | None = None, proto: Literal["tcp", "udp"] | None = None) -> list[DNSEntry]:
+
+def _dedupe_dns_entries(entries: list[DNSEntry]) -> list[DNSEntry]:
+    seen: dict[tuple, DNSEntry] = {}
+    for e in entries:
+        key = (e.type, e.domain, e.value)
+        seen.setdefault(key, e)
+    return list(seen.values())
+
+
+
+
+def _query(domain: str, record_type: DNSEntryType, service: str | None = None, proto: Literal["tcp", "udp"] | None = None) -> list[DNSEntry]:
     """
     Execute a DNS query
 
@@ -25,12 +37,12 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
         service (str | None): Only for SRV Records; service name (e.g. minecraft)
         proto (str | None): Only for SRV Records; protocol (tcp, udp)
     """
-    if record_type == EntryType.SRV and (service is None or proto is None):
+    if record_type == DNSEntryType.SRV and (service is None or proto is None):
         raise ValueError("Missing 'service' and/or 'protocol' parameter for SRV Query")
 
     entries = []
     try:
-        if record_type == EntryType.SRV:
+        if record_type == DNSEntryType.SRV:
             new = domain if "//" in domain else f"//{domain}"
             label = f"_{service}._{proto}.{urlparse(new).netloc}"
             resp = get_resolver().resolve(label, "SRV")
@@ -41,15 +53,15 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
 
             data = None
             match record_type:
-                case EntryType.IPv4 | EntryType.IPv6:
+                case DNSEntryType.IPv4 | DNSEntryType.IPv6:
                     data = rdata.address
-                case EntryType.MX:
+                case DNSEntryType.MX:
                     data = f"Preference: {rdata.preference}, Mail Domain: {rdata.exchange}"  # 10  mail.example.com.
-                case EntryType.NS | EntryType.CNAME:
+                case DNSEntryType.NS | DNSEntryType.CNAME:
                     data = str(rdata.target)  # ns1.example.com.
-                case EntryType.TXT:
+                case DNSEntryType.TXT:
                     data = b"".join(rdata.strings).decode()
-                case EntryType.SOA:
+                case DNSEntryType.SOA:
                     if resp:
                         soa = resp[0]
                         master_ns = soa.mname
@@ -62,7 +74,7 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
                         data = f"Master NS: {master_ns}, Email: {responsible_person_email}, Zone Version Number: {zone_version_number} (refresh: {version_number_refresh}, refresh check retry: {refresh_check_retry}), expire: {expire_limit}, negative_response_ttl: {negative_response_ttl}"
                     else:
                         data = None
-                case EntryType.SRV:
+                case DNSEntryType.SRV:
                     data = f"Priority: {rdata.priority}, Weight: {rdata.weight}, Port: {rdata.port}, Host: {rdata.target}"
 
 
@@ -76,4 +88,14 @@ def _query(domain: str, record_type: EntryType, service: str | None = None, prot
         return []
     return entries
 
+
+
+def _brute_srv(domain: str) -> list[DNSEntry]:
+    entries: list[DNSEntry] = []
+
+    for category, data in SRV_MAPPING.items():
+        for service, proto in data:
+            entries.extend(_query(domain, DNSEntryType.SRV, service, proto))
+
+    return entries
 

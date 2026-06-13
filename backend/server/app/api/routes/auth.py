@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
-from app.db.db import get_db
+from app.db import db_handler
 
 
 auth = APIRouter(prefix="/auth")
@@ -20,17 +20,17 @@ class CodeSubmit(BaseModel):
 
 
 @auth.post("/register")
-def register(register_user: RegisterUser, db = Depends(get_db)):
+def register(register_user: RegisterUser):
     pass
 
 
 @auth.post("/login")
-def login(login_user: LoginUser, db = Depends(get_db)):
+def login(login_user: LoginUser):
     pass
 
 
 @auth.post("/code/submit")
-def submit_code(code_submit: CodeSubmit, db = Depends(get_db)):
+def submit_code(code_submit: CodeSubmit):
     pass
 
 
