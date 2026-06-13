@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, Session
 
-from app.db.models._base import Base
+from app.db.models import Base
 from app.config import get_settings
 
 
@@ -54,5 +54,5 @@ class DBHandler:
         finally:
             db.close()
 
-db_handler = DBHandler()
+
 

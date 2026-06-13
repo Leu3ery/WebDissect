@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from app.db.db import DBError, DBIntegrityError, DBConnectionError
+from app.db import DBError, DBIntegrityError, DBConnectionError
 
 
 async def _integrity(request: Request, exc: DBIntegrityError):

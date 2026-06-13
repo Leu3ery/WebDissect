@@ -1,11 +1,8 @@
 from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
-from app.api.schemas import Project, DNSEntry, DNSEntryType
-from app.api.schemas._base_response import BaseResponse
-from app.db.db import db_handler
-from app.db.models import Certificate, Analysis
-from app.db.models.project import Project as DB_Project
-from app.db.models.dns_entry import DNSEntry as DB_DNSEntry
+from app.api.schemas import BaseResponse, Project, DNSEntry, DNSEntryType
+from app.db import db_handler
+from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
 from app.tools.tls_cert import fetch_cert, parse_cert
 

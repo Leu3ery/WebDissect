@@ -4,7 +4,7 @@ from typing import Literal
 from dns.resolver import Resolver, NoAnswer, NXDOMAIN, NoNameservers
 from dns.exception import Timeout
 
-from app.api.schemas.dns_entry import DNSEntry, DNSEntryType
+from app.api.schemas import DNSEntry, DNSEntryType
 from app.tools._dns_mappings import SRV_MAPPING
 
 
