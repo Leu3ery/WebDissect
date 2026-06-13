@@ -1,7 +1,6 @@
 from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
-from app.api.schemas.dns_entry import DNSEntry, EntryType
-from app.api.schemas.project import Project
+from app.api.schemas import Project, DNSEntry, DNSEntryType
 from app.api.schemas._base_response import BaseResponse
 from app.db.db import db_handler
 from app.db.models import Certificate, Analysis
@@ -15,12 +14,12 @@ projects = APIRouter(prefix="/projects")
 
 
 DNS_ENTRY_TYPES = [
-    EntryType.IPv4, EntryType.IPv6,
-    EntryType.CNAME,
-    EntryType.MX,
-    EntryType.NS,
-    EntryType.SOA,
-    EntryType.TXT
+    DNSEntryType.IPv4, DNSEntryType.IPv6,
+    DNSEntryType.CNAME,
+    DNSEntryType.MX,
+    DNSEntryType.NS,
+    DNSEntryType.SOA,
+    DNSEntryType.TXT
 ]
 
 
