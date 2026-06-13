@@ -48,7 +48,7 @@ def _fetch_dns(domain: str):
 
 
 def _fetch_cert(domain: str):
-    # TODO handle exceptions
+    # TODO: handle exceptions
     raw_cert = fetch_cert(domain)
     cert = parse_cert(raw_cert)
 
@@ -62,6 +62,7 @@ def _fetch_cert(domain: str):
 
 @projects.get("/{project_id}")
 def get_project(project_id: int):
+    # TODO: implement auth
     pass
 
 
@@ -70,6 +71,7 @@ def create_project(
     create_project: Project,
     bg: BackgroundTasks
 ):
+    # TODO: implement auth
     with db_handler.transaction() as db:
         db.add(DB_Project(
             name=create_project.name,
@@ -85,17 +87,20 @@ def create_project(
 
 @projects.patch("/{project_id}")
 def update_project(project_id: int, patch_project: Project):
+    # TODO: implement auth
     pass
 
 
 
 @projects.post("/{project_id}/upload")
 def upload_file(project_id: int, file: UploadFile):
+    # TODO: implement auth
     pass
 
 
 
 @projects.post("/{project_id}/analysis/start")
 def start_analysis(project_id: int):
+    # TODO: implement auth
     pass
 
