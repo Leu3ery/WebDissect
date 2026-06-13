@@ -15,5 +15,5 @@ class Certificate(Base):
     valid_from           = Column(DateTime,      nullable=False)
     valid_to             = Column(DateTime,      nullable=False)
     serial_number        = Column(VARCHAR(40),   nullable=False)
-    public_key_type      = Column(VARCHAR(10),   nullable=False)
+    public_key_type      = Column(VARCHAR(15),   nullable=False)
     fingerprint_sha256   = Column(CHAR(64),      nullable=False, unique=True)
