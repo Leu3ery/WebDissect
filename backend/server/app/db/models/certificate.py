@@ -7,7 +7,7 @@ class Certificate(Base):
 
     id                   = Column(Integer,       primary_key=True, autoincrement=True)
     subject_domain       = Column(NVARCHAR(253), nullable=False)
-    subject_organization = Column(NVARCHAR(64),  nullable=False)
+    subject_organization = Column(NVARCHAR(64),  nullable=True)
     subject_country      = Column(CHAR(2))
     issuer_name          = Column(NVARCHAR(253), nullable=False)
     issuer_organization  = Column(NVARCHAR(64))
