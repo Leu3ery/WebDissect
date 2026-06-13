@@ -1,9 +1,10 @@
-from fastapi import APIRouter, UploadFile, BackgroundTasks
+from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
 from app.api.schemas.dns_entry import DNSEntry, EntryType
 from app.api.schemas.project import Project
+from app.api.schemas._base_response import BaseResponse
 from app.db.db import db_handler
-from app.db.models import Certificate
+from app.db.models import Certificate, Analysis
 from app.db.models.project import Project as DB_Project
 from app.db.models.dns_entry import DNSEntry as DB_DNSEntry
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
@@ -67,22 +68,21 @@ def get_project(project_id: int):
 
 
 @projects.post("")
-def create_project(
-    create_project: Project,
-    bg: BackgroundTasks
-):
+def create_project(create_project: Project):
     # TODO: implement auth
+    project_id = None
     with db_handler.transaction() as db:
-        db.add(DB_Project(
+        project = DB_Project(
             name=create_project.name,
             domain=create_project.domain,
             # user_id=user.id
             user_id=1   # only for testing
-        ))
+        )
+        db.add(project)
+        db.flush()
+        project_id = project.id
 
-    bg.add_task(_fetch_dns, create_project.domain)
-    bg.add_task(_fetch_cert, create_project.domain)
-    return {"success" : True}  # only for testing
+    return BaseResponse(data={"projectId" : project_id})  # only for testing
 
 
 @projects.patch("/{project_id}")
@@ -100,7 +100,29 @@ def upload_file(project_id: int, file: UploadFile):
 
 
 @projects.post("/{project_id}/analysis/start")
-def start_analysis(project_id: int):
+def start_analysis(project_id: int, bg: BackgroundTasks):
     # TODO: implement auth
-    pass
+
+    with db_handler.transaction() as db:
+        project = db.get(DB_Project, project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        project_domain = project.domain
+
+
+    # Create new analysis in DB
+    with db_handler.transaction() as db:
+        analysis = Analysis(
+            project_id=project_id
+        )
+        db.add(analysis)
+        db.flush()   # required so the database generates the PK
+        analysis_id = analysis.id
+
+
+    # Start analysis and return analysis id
+    bg.add_task(_fetch_dns, project_domain)
+    bg.add_task(_fetch_cert, project_domain)
+    return BaseResponse(data={"analysisId" : analysis_id})
 
