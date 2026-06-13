@@ -1,7 +1,7 @@
 import os
 import uvicorn
 
-from app.db.db import db_handler
+from app.db import db_handler
 
 if __name__ == "__main__":
     db_handler.init_db()
