@@ -42,7 +42,8 @@ def _fetch_dns(domain: str, analysis_id: int):
                 type=entry.type,
                 domain=entry.domain,
                 value=entry.value,
-                ttl=entry.ttl
+                ttl=entry.ttl,
+                analysis_id=analysis_id
             ))
 
 
@@ -55,6 +56,7 @@ def _fetch_cert(domain: str, analysis_id: int):
     # TODO: handle exceptions
     raw_cert = fetch_cert(domain)
     cert = parse_cert(raw_cert)
+    cert.analysis_id = analysis_id
 
     with db_handler.transaction() as db:
         # Delete last certificate and replace with current one
