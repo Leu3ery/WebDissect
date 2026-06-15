@@ -11,6 +11,8 @@ from .endpoint import Endpoint
 from .subdomain import Subdomain
 from .port import Port
 from .path_entry import PathEntry
+from .security_check import SecurityCheck
+from .analysis_run import AnalysisRun
 
 __all__ = [
     "Base",
@@ -26,4 +28,6 @@ __all__ = [
     "Subdomain",
     "Port",
     "PathEntry",
+    "SecurityCheck",
+    "AnalysisRun",
 ]

@@ -58,6 +58,7 @@ def test_upload_har_then_endpoints_via_passive(client, make_user, monkeypatch):
     monkeypatch.setattr(analysis, "fetch_certificate", lambda host: None)
     monkeypatch.setattr(analysis, "fingerprint", lambda domain: [])
     monkeypatch.setattr(analysis, "enumerate_subdomains", lambda domain: [])
+    monkeypatch.setattr(analysis, "security_audit", lambda domain: [])
 
     _, token = make_user()
     pid = _create(client, token)["data"]["id"]

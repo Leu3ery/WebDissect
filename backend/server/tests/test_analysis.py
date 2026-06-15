@@ -24,6 +24,7 @@ def test_run_passive_persists_all(client, make_user, monkeypatch):
                         lambda d: [Technology(name="Nginx", description="srv", icon_url="x")])
     monkeypatch.setattr(analysis, "enumerate_subdomains",
                         lambda d: [Subdomain(name="api.example.com", ip="1.2.3.4", source="crt.sh")])
+    monkeypatch.setattr(analysis, "security_audit", lambda d: [])
 
     _, token = make_user()
     pid = _project(client, token)

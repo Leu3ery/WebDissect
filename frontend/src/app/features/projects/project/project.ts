@@ -1,11 +1,11 @@
 import {Component, effect, inject, input, numberAttribute, OnDestroy, output, signal} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {ProjectsService, ProjectFullI} from '../projects-service';
+import {AnalysisRunI, ProjectsService, ProjectFullI} from '../projects-service';
 import {AnalysisEvent, AnalysisSocketService, CategoryState} from '../analysis-socket';
 import {
-  LucideActivity, LucideFolderTree, LucideGlobe, LucideLayers, LucideLoaderCircle,
+  LucideActivity, LucideFolderTree, LucideGlobe, LucideHistory, LucideLayers, LucideLoaderCircle,
   LucideMenu, LucideNetwork, LucidePlay, LucideScanSearch, LucideSearch, LucideServer,
-  LucideShieldCheck, LucideUpload, LucideCheck
+  LucideShieldCheck, LucideShieldAlert, LucideUpload, LucideCheck, LucideDownload
 } from '@lucide/angular';
 import {NotificationService} from '../../../schared/notifications/notification-service';
 import {DnsTab} from './tabs/dns-tab/dns-tab';
@@ -15,16 +15,20 @@ import {SslTab} from './tabs/ssl-tab/ssl-tab';
 import {SubdomainsTab} from './tabs/subdomains-tab/subdomains-tab';
 import {PortsTab} from './tabs/ports-tab/ports-tab';
 import {PathsTab} from './tabs/paths-tab/paths-tab';
+import {SecurityTab} from './tabs/security-tab/security-tab';
+import {HistoryTab} from './tabs/history-tab/history-tab';
 
-type TabId = 'dns' | 'tech' | 'ep' | 'ssl' | 'subs' | 'ports' | 'paths';
+type TabId = 'dns' | 'tech' | 'ep' | 'ssl' | 'subs' | 'ports' | 'paths' | 'security' | 'history';
 
 @Component({
   selector: 'app-project',
   imports: [
     LucideMenu, LucideSearch, LucideUpload, LucidePlay, LucideGlobe, LucideLayers,
-    LucideActivity, LucideShieldCheck, LucideNetwork, LucideServer, LucideFolderTree,
-    LucideScanSearch, LucideLoaderCircle, LucideCheck,
+    LucideActivity, LucideShieldCheck, LucideShieldAlert, LucideNetwork, LucideServer,
+    LucideFolderTree, LucideHistory, LucideScanSearch, LucideLoaderCircle, LucideCheck,
+    LucideDownload,
     DnsTab, TechTab, EndpointsTab, SslTab, SubdomainsTab, PortsTab, PathsTab,
+    SecurityTab, HistoryTab,
   ],
   templateUrl: './project.html',
   styleUrl: './project.css',
@@ -37,9 +41,11 @@ export class Project implements OnDestroy {
   private analysisSocket = inject(AnalysisSocketService)
   notifications = inject(NotificationService)
   project = signal<null | ProjectFullI>(null)
+  history = signal<AnalysisRunI[]>([])
   uploading = signal(false)
   analyzing = signal(false)
   scanMenuOpen = signal(false)
+  exportMenuOpen = signal(false)
   activeTab = signal<TabId>('dns')
   progress = signal<Record<string, CategoryState>>({})
 
@@ -49,6 +55,7 @@ export class Project implements OnDestroy {
     {key: 'ssl', label: 'SSL/TLS'},
     {key: 'tech', label: 'Tech'},
     {key: 'subdomains', label: 'Subdomains'},
+    {key: 'security', label: 'Security'},
     {key: 'endpoints', label: 'Endpoints'},
     {key: 'ports', label: 'Ports'},
     {key: 'paths', label: 'Paths'},
@@ -62,9 +69,11 @@ export class Project implements OnDestroy {
       this.openSocket(id);
       if (!id) {
         this.project.set(null);
+        this.history.set([]);
         return;
       }
       this.loadProject(id);
+      this.loadHistory(id);
     });
   }
 
@@ -104,6 +113,7 @@ export class Project implements OnDestroy {
       case 'complete':
         this.analyzing.set(false);
         this.loadProject(id);
+        this.loadHistory(id);
         break;
       case 'error':
         this.notifications.error(ev.message ?? 'Analysis error.');
@@ -118,8 +128,44 @@ export class Project implements OnDestroy {
     });
   }
 
+  private loadHistory(id: number) {
+    this.projectService.getHistory(id).subscribe({
+      next: res => this.history.set(res.isSuccess ? res.data : []),
+      error: () => {/* history is non-critical */},
+    });
+  }
+
   catStatus(key: string): string {
     return this.progress()[key]?.status ?? '';
+  }
+
+  toggleExportMenu() {
+    this.exportMenuOpen.update(v => !v);
+  }
+
+  exportJson() {
+    this.exportMenuOpen.set(false);
+    this.projectService.exportJson(this.projectId()).subscribe({
+      next: blob => this.download(blob, `webdissect-${this.project()?.domain ?? 'project'}.json`),
+      error: () => this.notifications.error('Could not export JSON.'),
+    });
+  }
+
+  exportPdf() {
+    this.exportMenuOpen.set(false);
+    this.projectService.exportPdf(this.projectId()).subscribe({
+      next: blob => this.download(blob, `webdissect-${this.project()?.domain ?? 'project'}.pdf`),
+      error: () => this.notifications.error('Could not export PDF.'),
+    });
+  }
+
+  private download(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   onHarSelected(event: Event) {

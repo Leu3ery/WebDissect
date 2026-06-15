@@ -26,6 +26,20 @@
           }
         </div>
 
+        <div class="relative">
+          <button class="btn" type="button" (click)="toggleExportMenu()">
+            <svg lucideDownload size="16"></svg>
+            <span class="hidden md:inline">Export</span>
+          </button>
+          @if (exportMenuOpen()) {
+            <div class="scan-backdrop" (click)="toggleExportMenu()"></div>
+            <div class="scan-menu">
+              <button type="button" (click)="exportJson()"><svg lucideDownload size="15"></svg> Export JSON</button>
+              <button type="button" (click)="exportPdf()"><svg lucideDownload size="15"></svg> Export PDF</button>
+            </div>
+          }
+        </div>
+
         <button class="btn btn-primary" data-tour="run-analysis" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
           @if (analyzing()) {
             <svg lucideLoaderCircle size="16" class="animate-spin"></svg>
@@ -86,6 +100,13 @@
         <svg lucideShieldCheck size="14"></svg> SSL/TLS <span class="count">{{ p.certificates.length }}</span>
         @if (catStatus('ssl') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
       </button>
+      <button type="button" class="tab" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">
+        <svg lucideShieldAlert size="14"></svg> Security <span class="count">{{ p.security_checks.length }}</span>
+        @if (catStatus('security') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
+      </button>
+      <button type="button" class="tab" [class.active]="activeTab() === 'history'" (click)="activeTab.set('history')">
+        <svg lucideHistory size="14"></svg> History <span class="count">{{ history().length }}</span>
+      </button>
     </div>
     <div class="flex flex-col flex-1 min-h-0">
       @switch (activeTab()) {
@@ -96,6 +117,8 @@
         @case ('ports') { <app-ports-tab [ports]="p.ports" /> }
         @case ('paths') { <app-paths-tab [paths]="p.path_entries" /> }
         @case ('ssl') { <app-ssl-tab [certificates]="p.certificates" /> }
+        @case ('security') { <app-security-tab [checks]="p.security_checks" /> }
+        @case ('history') { <app-history-tab [runs]="history()" /> }
       }
     </div>
   } @else if (!projectId()) {

@@ -1,14 +1,17 @@
 import asyncio
+import json
 from typing import Any, Callable
 
 from app.core.logging import get_logger
 from app.db.db import SessionLocal
+from app.db.models.analysis_run import AnalysisRun
 from app.db.models.certificate import Certificate
 from app.db.models.dns_entry import DNSEntry
 from app.db.models.endpoint import Endpoint
 from app.db.models.path_entry import PathEntry
 from app.db.models.port import Port
 from app.db.models.project import Project
+from app.db.models.security_check import SecurityCheck
 from app.db.models.subdomain import Subdomain
 from app.db.models.technology import Technology
 from app.services import projects as P
@@ -16,6 +19,7 @@ from app.services.analysis_hub import hub
 from app.tools._dns import collect_dns
 from app.tools._paths import enumerate_paths
 from app.tools._ports import scan_ports
+from app.tools._security import audit as security_audit
 from app.tools._ssl import fetch_certificate
 from app.tools._subdomains import enumerate_subdomains
 from app.tools._tech import fingerprint
@@ -41,7 +45,7 @@ def _emit(project_id: int, category: str, status: str, count: int = 0, message: 
     )
 
 
-def _run(project_id: int, body: Callable[[Any, Project], None]) -> None:
+def _run(project_id: int, body: Callable[[Any, Project], None], kind: str = "analysis") -> None:
     db = SessionLocal()
     try:
         project = db.query(Project).filter(Project.id == project_id).first()
@@ -49,12 +53,36 @@ def _run(project_id: int, body: Callable[[Any, Project], None]) -> None:
             return
         hub.publish(project_id, {"type": "start"})
         body(db, project)
+        _record_run(db, project_id, kind)
     except Exception:
         logger.exception("Analysis worker failed for project %s", project_id)
         hub.publish(project_id, {"type": "error", "message": "Analysis failed"})
     finally:
         hub.publish(project_id, {"type": "complete"})
         db.close()
+
+
+def _record_run(db: Any, project_id: int, kind: str) -> None:
+    """Persist a snapshot of the project as a point in its analysis history."""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if project is None:
+        return
+    snap = P.build_full(project).model_dump(mode="json")
+    counts = {
+        "dns": len(snap["dns_entries"]),
+        "ssl": len(snap["certificates"]),
+        "tech": len(snap["technologies"]),
+        "subdomains": len(snap["subdomains"]),
+        "endpoints": len(snap["endpoints"]),
+        "ports": len(snap["ports"]),
+        "paths": len(snap["path_entries"]),
+        "security": len(snap["security_checks"]),
+    }
+    db.add(AnalysisRun(
+        project_id=project_id, kind=kind,
+        summary=json.dumps(counts), snapshot=json.dumps(snap),
+    ))
+    db.commit()
 
 
 # --- Passive analysis (DNS, SSL, tech, subdomains, endpoints) -------------
@@ -112,6 +140,16 @@ def run_passive(project_id: int) -> None:
         db.commit()
         _emit(project_id, "subdomains", "done", len(subs))
 
+        _emit(project_id, "security", "running")
+        sec = security_audit(domain)
+        P._replace(db, SecurityCheck, project_id, [
+            SecurityCheck(project_id=project_id, category=s.category, name=s.name,
+                          status=s.status, severity=s.severity, detail=s.detail)
+            for s in sec
+        ])
+        db.commit()
+        _emit(project_id, "security", "done", len(sec))
+
         _emit(project_id, "endpoints", "running")
         eps = list(P._endpoints_from_hars(db, project_id))
         P._replace(db, Endpoint, project_id, [
@@ -141,7 +179,7 @@ def run_port_scan(project_id: int) -> None:
         db.commit()
         _emit(project_id, "ports", "done", len(ports))
 
-    _run(project_id, body)
+    _run(project_id, body, kind="ports")
 
 
 def run_path_scan(project_id: int) -> None:
@@ -159,4 +197,4 @@ def run_path_scan(project_id: int) -> None:
         db.commit()
         _emit(project_id, "paths", "done", len(paths))
 
-    _run(project_id, body)
+    _run(project_id, body, kind="paths")

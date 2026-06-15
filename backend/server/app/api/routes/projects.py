@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Query, UploadFile, WebSocket, WebSocketDisconnect
+import json
+
+from fastapi import APIRouter, Depends, Query, Response, UploadFile, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -6,6 +8,7 @@ from app.api.deps import get_current_user
 from app.api.errors import ApiError
 from app.api.rate_limit import scan_limiter
 from app.api.response import ApiResponse, ok
+from app.api.schemas.analysis_run import AnalysisRunRead
 from app.api.schemas.responses import ProjectFull, ProjectRead
 from app.core.security import decode_access_token
 from app.db.db import SessionLocal, get_db
@@ -118,6 +121,45 @@ async def scan_paths(
     projects_service.get_owned_project(db, user, project_id)
     analysis_service.schedule(analysis_service.run_path_scan, project_id)
     return ok(None, "Path scan started")
+
+
+@projects.get("/{project_id}/history")
+def get_history(
+    project_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> ApiResponse[list[AnalysisRunRead]]:
+    return ok(projects_service.list_runs(db, user, project_id))
+
+
+@projects.get("/{project_id}/export/json")
+def export_json(
+    project_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Response:
+    data = projects_service.export_json(db, user, project_id)
+    filename = f"webdissect-{data.get('domain', 'project')}.json"
+    return Response(
+        content=json.dumps(data, indent=2),
+        media_type="application/json",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@projects.get("/{project_id}/export/pdf")
+def export_pdf(
+    project_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> Response:
+    pdf = projects_service.export_pdf(db, user, project_id)
+    project = projects_service.get_owned_project(db, user, project_id)
+    return Response(
+        content=pdf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="webdissect-{project.domain}.pdf"'},
+    )
 
 
 @projects.websocket("/{project_id}/analysis/ws")

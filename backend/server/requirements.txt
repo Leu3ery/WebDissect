@@ -20,3 +20,6 @@ pydantic-settings
 # Tools
 dnspython
 cryptography
+
+# Reporting
+fpdf2

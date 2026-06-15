@@ -1,0 +1,33 @@
+<div class="flex flex-col flex-1 min-h-0">
+  <div class="flex gap-2 items-center px-3 md:px-5 pt-3 md:pt-4">
+    <span class="badge red">{{ fails() }} fail</span>
+    <span class="badge yellow">{{ warns() }} warn</span>
+    <span class="badge green">{{ oks() }} ok</span>
+  </div>
+  <div class="flex-1 overflow-auto p-3 md:p-5">
+    <div class="card overflow-hidden">
+      <table class="dt">
+        <thead>
+          <tr>
+            <th style="width:90px">Severity</th>
+            <th style="width:200px">Check</th>
+            <th style="width:80px">Status</th>
+            <th>Detail</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of checks(); track c.id) {
+            <tr>
+              <td data-label="Severity"><span [class]="'badge ' + severityBadge(c.severity)">{{ c.severity }}</span></td>
+              <td data-label="Check">{{ c.name }}</td>
+              <td data-label="Status"><span [class]="'badge ' + statusBadge(c.status)">{{ c.status }}</span></td>
+              <td class="muted" style="word-break:break-word" data-label="Detail">{{ c.detail }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="muted" style="text-align:center;padding:24px">No security checks yet. Run an analysis to populate this tab.</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

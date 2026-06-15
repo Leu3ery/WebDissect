@@ -1,0 +1,23 @@
+<div class="flex-1 overflow-auto p-3 md:p-5">
+  @for (row of rows(); track row.id) {
+    <div class="card" style="padding:14px;margin-bottom:10px">
+      <div class="flex items-center justify-between" style="margin-bottom:10px">
+        <span class="mono" style="font-size:12.5px;color:var(--text)">{{ row.time }}</span>
+        <span class="badge cyan">{{ row.kind }}</span>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        @for (cell of row.cells; track cell.label) {
+          <span class="badge" style="gap:6px">
+            {{ cell.label }} {{ cell.count }}
+            @if (cell.delta > 0) { <span style="color:var(--accent-2)">+{{ cell.delta }}</span> }
+            @else if (cell.delta < 0) { <span style="color:var(--danger)">{{ cell.delta }}</span> }
+          </span>
+        }
+      </div>
+    </div>
+  } @empty {
+    <p class="muted" style="color:var(--text-2);font-size:13px;text-align:center;padding:24px">
+      No analysis history yet. Run an analysis to create the first snapshot.
+    </p>
+  }
+</div>
