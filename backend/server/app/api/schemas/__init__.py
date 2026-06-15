@@ -1,4 +1,4 @@
-from ._base_response import BaseResponse
+from ._responses import BaseResponse, AnalysisStartData
 from .certificate import Certificate
 from .dns_entry import DNSEntry, DNSEntryType
 from .endpoint import Endpoint
