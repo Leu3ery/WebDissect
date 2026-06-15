@@ -1,0 +1,20 @@
+from typing import Any, TypeVar, Generic
+from pydantic import BaseModel, Field
+
+T = TypeVar("T")
+
+
+class BaseResponse(BaseModel, Generic[T]):
+    is_success: bool          = Field(serialization_alias="isSuccess", default=True)
+    error_message: str | None = Field(serialization_alias="errorMessage", default=None)
+    data: T                   = Field()
+
+
+
+class AnalysisStartData(BaseModel):
+    analysis_id: int = Field(serialization_alias="analysisId")
+
+
+class AnalysisStart(BaseResponse[AnalysisStartData]):
+    data: AnalysisStartData
+

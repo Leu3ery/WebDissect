@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 
 class Certificate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int | None                   = Field(description="id of cert in the DB", default=None)
     subject_domain: str              = Field(description="Domain for which the certificate is issued")
     subject_organization: str | None = Field(description="Owner Organization", default=None)
-    subject_country: str             = Field(description="Country in which the company resides")
+    subject_country: str | None      = Field(description="Country in which the company resides")
     issuer_name: str                 = Field(description="")
     issuer_organization: str         = Field(description="")
     issuer_country: str              = Field(description="")

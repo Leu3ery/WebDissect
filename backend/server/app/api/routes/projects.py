@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
-from app.api.schemas import BaseResponse, Project, DNSEntry, DNSEntryType
+from app.api.schemas import BaseResponse, AnalysisStartData
+from app.api.schemas import Project, DNSEntry, DNSEntryType
+from app.api.schemas._responses import AnalysisStart
 from app.db import db_handler
 from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
@@ -22,7 +24,7 @@ DNS_ENTRY_TYPES = [
 
 # ~~~~~~~~~~ # Utility functions # ~~~~~~~~~~ #
 
-def _fetch_dns(domain: str):
+def _fetch_dns(domain: str, analysis_id: int):
     entries: list[DNSEntry] = []
 
     for entry_type in DNS_ENTRY_TYPES:
@@ -40,20 +42,31 @@ def _fetch_dns(domain: str):
                 type=entry.type,
                 domain=entry.domain,
                 value=entry.value,
-                ttl=entry.ttl
+                ttl=entry.ttl,
+                analysis_id=analysis_id
             ))
 
 
-def _fetch_cert(domain: str):
+    # Mark DNS Analysis as completed
+    with db_handler.transaction() as db:
+        db.get(Analysis, analysis_id).is_dns_analysis_completed = True
+
+
+def _fetch_cert(domain: str, analysis_id: int):
     # TODO: handle exceptions
     raw_cert = fetch_cert(domain)
     cert = parse_cert(raw_cert)
+    cert.analysis_id = analysis_id
 
     with db_handler.transaction() as db:
         # Delete last certificate and replace with current one
         db.query(Certificate).delete(synchronize_session=False)
         db.add(cert)
 
+
+    # Mark Certificate Analysis as completed
+    with db_handler.transaction() as db:
+        db.get(Analysis, analysis_id).is_certificate_analysis_completed = True
 
 
 
@@ -95,7 +108,7 @@ def upload_file(project_id: int, file: UploadFile):
 
 
 
-@projects.post("/{project_id}/analysis/start")
+@projects.post("/{project_id}/analysis/start", response_model=BaseResponse[AnalysisStartData])
 def start_analysis(project_id: int, bg: BackgroundTasks):
     # TODO: implement auth
 
@@ -118,7 +131,7 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
 
 
     # Start analysis and return analysis id
-    bg.add_task(_fetch_dns, project_domain)
-    bg.add_task(_fetch_cert, project_domain)
-    return BaseResponse(data={"analysisId" : analysis_id})
+    bg.add_task(_fetch_dns, project_domain, analysis_id)
+    bg.add_task(_fetch_cert, project_domain, analysis_id)
+    return AnalysisStart(data=AnalysisStartData(analysis_id=analysis_id))
 
