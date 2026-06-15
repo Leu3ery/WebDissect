@@ -1,6 +1,8 @@
 from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
-from app.api.schemas import BaseResponse, Project, DNSEntry, DNSEntryType
+from app.api.schemas import BaseResponse, AnalysisStartData
+from app.api.schemas import Project, DNSEntry, DNSEntryType
+from app.api.schemas._responses import AnalysisStart
 from app.db import db_handler
 from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
@@ -104,7 +106,7 @@ def upload_file(project_id: int, file: UploadFile):
 
 
 
-@projects.post("/{project_id}/analysis/start")
+@projects.post("/{project_id}/analysis/start", response_model=BaseResponse[AnalysisStartData])
 def start_analysis(project_id: int, bg: BackgroundTasks):
     # TODO: implement auth
 
@@ -129,5 +131,5 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
     # Start analysis and return analysis id
     bg.add_task(_fetch_dns, project_domain, analysis_id)
     bg.add_task(_fetch_cert, project_domain, analysis_id)
-    return BaseResponse(data={"analysisId" : analysis_id})
+    return AnalysisStart(data=AnalysisStartData(analysis_id=analysis_id))
 
