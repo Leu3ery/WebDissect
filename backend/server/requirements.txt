@@ -18,3 +18,4 @@ pydantic-settings
 # Tools
 dnspython
 cryptography
+tldextract
