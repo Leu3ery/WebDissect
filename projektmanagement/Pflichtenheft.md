@@ -45,21 +45,20 @@
 
 Base URL: `https://…/api/`
 
-| Method | URL | Description |
-| --- | --- | --- |
-| POST | /auth/register | Register a new user |
-| POST | /auth/code/submit | Submit OTP code from email |
-| POST | /auth/login | Login using email + password |
-| PATCH | /auth/me | Update user password |
-|  |  |  |
-| GET | /me | Fetch user projects |
-| POST | /projects | Create project |
-| POST | /projects/{id}/upload | Upload .har file |
-| GET | /projects/{id} | Get project info + data for all categories |
-| PATCH | /projects/{id} | Update project (name, domain) |
+| Method | URL                         | Description                   |
+| --- |-----------------------------|-------------------------------|
+| POST | /auth/register              | Register a new user           |
+| POST | /auth/code/submit           | Submit OTP code from email    |
+| POST | /auth/login                 | Login using email + password  |
+| PATCH | /auth/me                    | Update user password          |
+|  |                             |                               |
+| GET | /projects                   | Fetch user projects           |
+| POST | /projects                   | Create project                |
+| POST | /projects/{id}/upload       | Upload .har file              |
+| PATCH | /projects/{id}              | Update project (name, domain) |
 | POST | /projects/{id}/analysis/start | Start user-triggered analysis |
-|  |  |  |
-| WS | ws://category/{id} | Live updates about analysis progress |
+| GET | /dns/{analysis_id} | Fetch DNS Entries of site     |
+| GET | /tls/{analysis_id} | Fetch Certificat info of site |
 
 
 ## Datacatalog
