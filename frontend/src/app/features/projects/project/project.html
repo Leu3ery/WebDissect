@@ -7,118 +7,39 @@
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <input #harInput class="hidden" type="file" accept=".har" (change)="onHarSelected($event)">
-        <button class="btn" data-tour="upload-har" type="button" [disabled]="uploading()" (click)="harInput.click()">
+        <button class="btn" type="button" [disabled]="uploading()" (click)="harInput.click()">
           <svg lucideUpload size="16"></svg>
           <span class="hidden md:inline">{{ uploading() ? 'Uploading…' : 'Upload HAR' }}</span>
         </button>
-
-        <div class="relative">
-          <button class="btn" type="button" [disabled]="analyzing()" (click)="toggleScanMenu()">
-            <svg lucideScanSearch size="16"></svg>
-            <span class="hidden md:inline">Scan</span>
-          </button>
-          @if (scanMenuOpen()) {
-            <div class="scan-backdrop" (click)="toggleScanMenu()"></div>
-            <div class="scan-menu">
-              <button type="button" (click)="scanPorts()"><svg lucideServer size="15"></svg> Port scan</button>
-              <button type="button" (click)="scanPaths()"><svg lucideFolderTree size="15"></svg> Path scan</button>
-            </div>
-          }
-        </div>
-
-        <div class="relative">
-          <button class="btn" type="button" (click)="toggleExportMenu()">
-            <svg lucideDownload size="16"></svg>
-            <span class="hidden md:inline">Export</span>
-          </button>
-          @if (exportMenuOpen()) {
-            <div class="scan-backdrop" (click)="toggleExportMenu()"></div>
-            <div class="scan-menu">
-              <button type="button" (click)="exportJson()"><svg lucideDownload size="15"></svg> Export JSON</button>
-              <button type="button" (click)="exportPdf()"><svg lucideDownload size="15"></svg> Export PDF</button>
-            </div>
-          }
-        </div>
-
-        <button class="btn btn-primary" data-tour="run-analysis" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
-          @if (analyzing()) {
-            <svg lucideLoaderCircle size="16" class="animate-spin"></svg>
-          } @else {
-            <svg lucidePlay size="16"></svg>
-          }
+        <button class="btn btn-primary" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
+          <svg lucidePlay size="16"></svg>
           <span class="hidden md:inline">{{ analyzing() ? 'Running…' : 'Run Analysis' }}</span>
         </button>
         <svg lucideMenu class="navbar-close-open-button" (click)="openNavLeft()"></svg>
       </div>
     </div>
   }
-
-  @if (project() && analyzing()) {
-    <div class="progress-strip">
-      @for (c of progressCats; track c.key) {
-        @if (catStatus(c.key)) {
-          <span class="progress-chip" [class.done]="catStatus(c.key) === 'done'">
-            @switch (catStatus(c.key)) {
-              @case ('running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
-              @case ('done') { <svg lucideCheck size="12"></svg> }
-              @case ('error') { <svg lucideCheck size="12"></svg> }
-            }
-            {{ c.label }}
-          </span>
-        }
-      }
-    </div>
-  }
-
   @if (project(); as p) {
-    <div class="tabs px-3 md:px-5" data-tour="tabs">
+    <div class="tabs px-3 md:px-5">
       <button type="button" class="tab" [class.active]="activeTab() === 'dns'" (click)="activeTab.set('dns')">
         <svg lucideGlobe size="14"></svg> DNS <span class="count">{{ p.dns_entries.length }}</span>
-        @if (catStatus('dns') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
       </button>
       <button type="button" class="tab" [class.active]="activeTab() === 'tech'" (click)="activeTab.set('tech')">
         <svg lucideLayers size="14"></svg> Tech Stack <span class="count">{{ p.technologies.length }}</span>
-        @if (catStatus('tech') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
-      </button>
-      <button type="button" class="tab" [class.active]="activeTab() === 'subs'" (click)="activeTab.set('subs')">
-        <svg lucideNetwork size="14"></svg> Subdomains <span class="count">{{ p.subdomains.length }}</span>
-        @if (catStatus('subdomains') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
       </button>
       <button type="button" class="tab" [class.active]="activeTab() === 'ep'" (click)="activeTab.set('ep')">
         <svg lucideActivity size="14"></svg> Endpoints <span class="count">{{ p.endpoints.length }}</span>
-        @if (catStatus('endpoints') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
-      </button>
-      <button type="button" class="tab" [class.active]="activeTab() === 'ports'" (click)="activeTab.set('ports')">
-        <svg lucideServer size="14"></svg> Ports <span class="count">{{ p.ports.length }}</span>
-        @if (catStatus('ports') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
-      </button>
-      <button type="button" class="tab" [class.active]="activeTab() === 'paths'" (click)="activeTab.set('paths')">
-        <svg lucideFolderTree size="14"></svg> Paths <span class="count">{{ p.path_entries.length }}</span>
-        @if (catStatus('paths') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
       </button>
       <button type="button" class="tab" [class.active]="activeTab() === 'ssl'" (click)="activeTab.set('ssl')">
         <svg lucideShieldCheck size="14"></svg> SSL/TLS <span class="count">{{ p.certificates.length }}</span>
-        @if (catStatus('ssl') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
-      </button>
-      <button type="button" class="tab" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">
-        <svg lucideShieldAlert size="14"></svg> Security <span class="count">{{ p.security_checks.length }}</span>
-        @if (catStatus('security') === 'running') { <svg lucideLoaderCircle size="12" class="animate-spin"></svg> }
-      </button>
-      <button type="button" class="tab" [class.active]="activeTab() === 'history'" (click)="activeTab.set('history')">
-        <svg lucideHistory size="14"></svg> History <span class="count">{{ history().length }}</span>
       </button>
     </div>
     <div class="flex flex-col flex-1 min-h-0">
       @switch (activeTab()) {
         @case ('dns') { <app-dns-tab [entries]="p.dns_entries" /> }
         @case ('tech') { <app-tech-tab [technologies]="p.technologies" /> }
-        @case ('subs') { <app-subdomains-tab [subdomains]="p.subdomains" /> }
         @case ('ep') { <app-endpoints-tab [endpoints]="p.endpoints" /> }
-        @case ('ports') { <app-ports-tab [ports]="p.ports" /> }
-        @case ('paths') { <app-paths-tab [paths]="p.path_entries" /> }
         @case ('ssl') { <app-ssl-tab [certificates]="p.certificates" /> }
-        @case ('security') { <app-security-tab [checks]="p.security_checks" /> }
-        @case ('history') { <app-history-tab [runs]="history()" /> }
       }
     </div>
   } @else if (!projectId()) {
@@ -145,3 +66,10 @@
     </div>
   }
 </div>
+
+<!---->
+
+<!--{{projectId()}}-->
+
+
+

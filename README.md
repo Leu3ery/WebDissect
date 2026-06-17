@@ -58,36 +58,6 @@ Base path: `/api`. Every response uses the envelope
 | GET | `/projects/{id}` | ✓ | Project + DNS / certs / tech / endpoints |
 | PATCH | `/projects/{id}` | ✓ | Update name / domain |
 | POST | `/projects/{id}/upload` | ✓ | Upload a HAR file (≤ 10 MB) |
-| POST | `/projects/{id}/analysis/start` | ✓ | Start passive analysis (runs in background) |
-| POST | `/projects/{id}/scan/ports` | ✓ | Opt-in TCP port scan + banner grab |
-| POST | `/projects/{id}/scan/paths` | ✓ | Opt-in path/directory enumeration |
-| GET | `/projects/{id}/history` | ✓ | Analysis history (snapshots + counts) |
-| GET | `/projects/{id}/export/json` | ✓ | Download the project report as JSON |
-| GET | `/projects/{id}/export/pdf` | ✓ | Download a formatted PDF report |
-| WS | `/projects/{id}/analysis/ws?token=…` | ✓ | Live analysis progress stream |
+| POST | `/projects/{id}/analysis/start` | ✓ | Run the analysis |
 
 Interactive OpenAPI docs are available at `/docs` on the backend.
-
-## Analysis features
-
-- **Passive** (`analysis/start`): DNS records, TLS certificate, technology
-  fingerprinting (headers/HTML, with versions) and subdomains via crt.sh, plus
-  endpoints from uploaded HAR files. Results stream live over the WebSocket.
-- **Active, opt-in**: TCP port scan with banner grabbing + service/version
-  detection (`scan/ports`), and path/directory enumeration (`scan/paths`) with
-  soft-404 detection (filters catch-all pages returned without a 404 status).
-- **Security audit**: security-header checks (HSTS, CSP, X-Frame-Options, …) and
-  a TLS audit (protocol, legacy TLS 1.0/1.1, certificate expiry).
-- **History**: every analysis stores a snapshot; the History tab shows counts
-  per category with deltas vs the previous run.
-- **Export**: download a project as JSON or a formatted PDF report.
-- Auth endpoints are protected by an in-memory per-IP rate limiter.
-
-## Tests
-
-```bash
-cd backend/server
-pip install -r requirements-dev.txt
-python -m pytest                 # 41 tests
-python -m pytest --cov=app       # coverage report
-```

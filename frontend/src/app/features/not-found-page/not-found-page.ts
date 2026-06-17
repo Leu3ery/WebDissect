@@ -1,12 +1,11 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
-import {RouterLink} from '@angular/router';
-import {LucideRadar} from '@lucide/angular';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-not-found-page',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, LucideRadar],
+  imports: [],
   templateUrl: './not-found-page.html',
   styleUrl: './not-found-page.css',
 })
-export class NotFoundPage {}
+export class NotFoundPage {
+
+}

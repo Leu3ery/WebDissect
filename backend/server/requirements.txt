@@ -7,8 +7,6 @@ fastapi
 python-jose
 uvicorn[standard]
 python-multipart
-httpx
-websockets
 
 # DB
 sqlalchemy
@@ -20,6 +18,3 @@ pydantic-settings
 # Tools
 dnspython
 cryptography
-
-# Reporting
-fpdf2

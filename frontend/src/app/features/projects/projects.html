@@ -27,9 +27,7 @@
 <!--      <p class="text-(&#45;&#45;danger-2)">Log out</p>-->
 <!--    </button>-->
 <!--  </div>-->
-  <app-settings (logout)="logout()" (openChangePassword)="openChangePassword()" (replayTour)="replayTour()" class="popup settings" [class.active]="isSettingsOpen()"></app-settings>
-
-  <app-tour></app-tour>
+  <app-settings (logout)="logout()" (openChangePassword)="openChangePassword()" class="popup settings" [class.active]="isSettingsOpen()"></app-settings>
   @if (isChangePasswordOpen()) {
     <app-change-password (backFromChangePassword)="backFromChangePassword()" (closeChangePassword)="setChangePassword(false)" class="popup change-password" [class.active]="isChangePasswordOpen()"></app-change-password>
   }

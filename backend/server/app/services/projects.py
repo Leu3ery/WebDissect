@@ -1,12 +1,9 @@
-import json
 import os
 
 from sqlalchemy.orm import Session
 
 from app.api.errors import ApiError, NotFound
-from app.api.schemas.analysis_run import AnalysisRunRead
 from app.api.schemas.responses import ProjectFull
-from app.db.models.analysis_run import AnalysisRun
 from app.config import get_settings
 from app.core.logging import get_logger
 from app.db.models.certificate import Certificate
@@ -199,38 +196,38 @@ def _hostname(domain: str) -> str:
 
 
 def build_full(project: Project) -> ProjectFull:
-    # All nested schemas enable from_attributes, so a single validate maps the
-    # ORM project + its relationship collections onto the response model.
-    return ProjectFull.model_validate(project)
-
-
-def list_runs(db: Session, user: User, project_id: int) -> list[AnalysisRunRead]:
-    project = get_owned_project(db, user, project_id)
-    runs = (
-        db.query(AnalysisRun)
-        .filter(AnalysisRun.project_id == project.id)
-        .order_by(AnalysisRun.created_at.desc())
-        .all()
+    return ProjectFull(
+        id=project.id,
+        name=project.name,
+        domain=project.domain,
+        user_id=project.user_id,
+        certificates=[Certificate_to(c) for c in project.certificates],
+        dns_entries=[DNS_to(d) for d in project.dns_entries],
+        technologies=[Tech_to(t) for t in project.technologies],
+        endpoints=[Endpoint_to(e) for e in project.endpoints],
     )
-    out: list[AnalysisRunRead] = []
-    for run in runs:
-        try:
-            counts = json.loads(run.summary or "{}")
-        except json.JSONDecodeError:
-            counts = {}
-        out.append(AnalysisRunRead(
-            id=run.id, created_at=run.created_at, kind=run.kind, counts=counts
-        ))
-    return out
 
 
-def export_json(db: Session, user: User, project_id: int) -> dict:
-    project = get_owned_project(db, user, project_id)
-    return build_full(project).model_dump(mode="json")
+# Local import-free ORM -> schema helpers (avoid nested from_attributes surprises)
+def Certificate_to(c):
+    from app.api.schemas.certificate import Certificate as S
+
+    return S.model_validate(c)
 
 
-def export_pdf(db: Session, user: User, project_id: int) -> bytes:
-    from app.services.report import build_pdf
+def DNS_to(d):
+    from app.api.schemas.dns_entry import DNSEntry as S
 
-    project = get_owned_project(db, user, project_id)
-    return build_pdf(build_full(project).model_dump(mode="json"))
+    return S.model_validate(d)
+
+
+def Tech_to(t):
+    from app.api.schemas.technology import Technology as S
+
+    return S.model_validate(t)
+
+
+def Endpoint_to(e):
+    from app.api.schemas.endpoint import Endpoint as S
+
+    return S.model_validate(e)

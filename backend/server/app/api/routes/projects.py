@@ -1,22 +1,14 @@
-import json
-
-from fastapi import APIRouter, Depends, Query, Response, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Depends, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.api.errors import ApiError
-from app.api.rate_limit import scan_limiter
 from app.api.response import ApiResponse, ok
-from app.api.schemas.analysis_run import AnalysisRunRead
 from app.api.schemas.responses import ProjectFull, ProjectRead
-from app.core.security import decode_access_token
-from app.db.db import SessionLocal, get_db
-from app.db.models.project import Project
+from app.db.db import get_db
 from app.db.models.user import User
-from app.services import analysis as analysis_service
 from app.services import projects as projects_service
-from app.services.analysis_hub import hub
 
 projects = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -88,115 +80,10 @@ async def upload_file(
 
 
 @projects.post("/{project_id}/analysis/start")
-async def start_analysis(
+def start_analysis(
     project_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> ApiResponse[None]:
-    """Kick off the passive analysis in the background; progress streams over WS."""
-    projects_service.get_owned_project(db, user, project_id)  # ownership check
-    analysis_service.schedule(analysis_service.run_passive, project_id)
-    return ok(None, "Analysis started")
-
-
-@projects.post("/{project_id}/scan/ports", dependencies=[Depends(scan_limiter)])
-async def scan_ports(
-    project_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> ApiResponse[None]:
-    """Opt-in TCP port scan + banner grab against the target."""
-    projects_service.get_owned_project(db, user, project_id)
-    analysis_service.schedule(analysis_service.run_port_scan, project_id)
-    return ok(None, "Port scan started")
-
-
-@projects.post("/{project_id}/scan/paths", dependencies=[Depends(scan_limiter)])
-async def scan_paths(
-    project_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> ApiResponse[None]:
-    """Opt-in path/directory enumeration against the target."""
-    projects_service.get_owned_project(db, user, project_id)
-    analysis_service.schedule(analysis_service.run_path_scan, project_id)
-    return ok(None, "Path scan started")
-
-
-@projects.get("/{project_id}/history")
-def get_history(
-    project_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> ApiResponse[list[AnalysisRunRead]]:
-    return ok(projects_service.list_runs(db, user, project_id))
-
-
-@projects.get("/{project_id}/export/json")
-def export_json(
-    project_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> Response:
-    data = projects_service.export_json(db, user, project_id)
-    filename = f"webdissect-{data.get('domain', 'project')}.json"
-    return Response(
-        content=json.dumps(data, indent=2),
-        media_type="application/json",
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
-
-
-@projects.get("/{project_id}/export/pdf")
-def export_pdf(
-    project_id: int,
-    db: Session = Depends(get_db),
-    user: User = Depends(get_current_user),
-) -> Response:
-    pdf = projects_service.export_pdf(db, user, project_id)
-    project = projects_service.get_owned_project(db, user, project_id)
-    return Response(
-        content=pdf,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="webdissect-{project.domain}.pdf"'},
-    )
-
-
-@projects.websocket("/{project_id}/analysis/ws")
-async def analysis_ws(
-    websocket: WebSocket,
-    project_id: int,
-    token: str = Query(default=""),
-) -> None:
-    """Stream live analysis progress. Auth via ?token= since browsers can't set
-    WebSocket headers."""
-    user_id = decode_access_token(token)
-    if user_id is None or not _owns_project(user_id, project_id):
-        await websocket.close(code=4401)
-        return
-
-    await websocket.accept()
-    hub.bind_loop_from_running()
-    queue = hub.subscribe(project_id)
-    try:
-        await websocket.send_json({"type": "snapshot", **hub.snapshot(project_id)})
-        while True:
-            event = await queue.get()
-            await websocket.send_json(event)
-    except WebSocketDisconnect:
-        pass
-    finally:
-        hub.unsubscribe(project_id, queue)
-
-
-def _owns_project(user_id: int, project_id: int) -> bool:
-    db = SessionLocal()
-    try:
-        return (
-            db.query(Project)
-            .filter(Project.id == project_id, Project.user_id == user_id)
-            .first()
-            is not None
-        )
-    finally:
-        db.close()
+    projects_service.run_analysis(db, user, project_id)
+    return ok(None, "Analysis completed")

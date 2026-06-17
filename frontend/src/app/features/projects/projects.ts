@@ -9,8 +9,6 @@ import {Router} from '@angular/router';
 import {ChangePassword} from './change-password/change-password';
 import {NewProject} from './new-project/new-project';
 import {Settings} from './settings/settings';
-import {Tour} from '../../schared/tour/tour';
-import {TourService} from '../../schared/tour/tour-service';
 
 @Component({
   selector: 'app-projects',
@@ -21,8 +19,7 @@ import {TourService} from '../../schared/tour/tour-service';
     LucideLogOut,
     ChangePassword,
     NewProject,
-    Settings,
-    Tour
+    Settings
   ],
   templateUrl: './projects.html',
   styleUrl: './projects.css',
@@ -41,7 +38,6 @@ export class Projects implements OnDestroy, OnInit {
     map(() => window.innerWidth < 768)
   ).subscribe(v => this.isMobile.set(v));
   projectService = inject(ProjectsService)
-  private tourService = inject(TourService)
 
   ngOnInit(): void {
     this.projectService.getProjects().subscribe({
@@ -52,14 +48,6 @@ export class Projects implements OnDestroy, OnInit {
       },
       error: () => this.projectsError.set('Could not load projects.'),
     })
-    // Show the onboarding tour on first visit (no-op if already completed).
-    this.tourService.start()
-  }
-
-  replayTour() {
-    this.setSettingsOpen(false)
-    this.setNavLeft(false)
-    this.tourService.start(true)
   }
 
   ngOnDestroy() {
