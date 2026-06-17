@@ -3,7 +3,10 @@ services:
         expose:
             - "6767"
         volumes:
-            -   "./db:/app/db"
+            # Named volume (Docker-managed) instead of a host bind mount:
+            # the container can always write here, and it survives redeploys.
+            # A bind mount to the cloned repo dir caused "readonly database".
+            -   "dbdata:/app/db"
         env_file:
             -  ".env"
         environment:
@@ -35,3 +38,6 @@ networks:
     web:
     dokploy-network:
         external: true
+
+volumes:
+    dbdata:
