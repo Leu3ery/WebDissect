@@ -97,7 +97,12 @@ def create_project(create_project: Project):
 @projects.patch("/{project_id}")
 def update_project(project_id: int, patch_project: Project):
     # TODO: implement auth
-    pass
+    with db_handler.transaction() as db:
+        proj = db.get(DB_Project, project_id)
+        proj.domain = patch_project.domain
+        proj.name = patch_project.name
+
+    return BaseResponse(data={})
 
 
 
