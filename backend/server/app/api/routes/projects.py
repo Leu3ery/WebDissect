@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
-from app.api.schemas import BaseResponse, AnalysisStartData
+from app.api.schemas import BaseResponse, AnalysisStartData, project
 from app.api.schemas import Project, DNSEntry, DNSEntryType
-from app.api.schemas._responses import AnalysisStart
+from app.api.schemas._responses import AnalysisStart, Projects
 from app.db import db_handler
 from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
@@ -70,10 +70,13 @@ def _fetch_cert(domain: str, analysis_id: int):
 
 
 
-@projects.get("/{project_id}")
-def get_project(project_id: int):
+@projects.get("", response_model=Projects)
+def get_projects():
     # TODO: implement auth
-    pass
+
+    with db_handler.transaction() as db:
+        projects = db.query(DB_Project).all()
+        return BaseResponse(data={"projects" : [Project.model_validate(p) for p in projects]})
 
 
 @projects.post("")
