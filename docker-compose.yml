@@ -1,0 +1,20 @@
+services:
+    backend-server:
+        expose:
+            - "6767"
+        volumes:
+            -   "./db:/app/db"
+        env_file:
+            -  ".env"
+        build:
+            context: .
+            dockerfile: backend/server/Dockerfile
+    frontend-server:
+        expose:
+            - "80"
+        build:
+            context: ./frontend
+            dockerfile: Dockerfile
+        depends_on:
+            -   backend-server
+

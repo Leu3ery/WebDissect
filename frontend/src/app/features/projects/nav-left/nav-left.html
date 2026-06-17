@@ -1,0 +1,37 @@
+
+<div class="flex flex-col w-full h-full">
+  <div class="flex justify-between items-center p-4 border-b-1 border-(--border)">
+    <p class="text-3xl font-bold text-(--text)">WebDissect</p>
+    <svg class="navbar-close-open-button hover:cursor-pointer" (click)="closeNavLeft()" lucideX [size]="32" strokeWidth="1"></svg>
+  </div>
+  <div class="flex-1 flex flex-col gap-3 p-4 border-b-1 border-(--border)">
+    <button class="btn" (click)="openNewProject.emit()"><svg lucidePlus size="16"></svg> New project</button>
+    <div class="flex justify-between pl-2 pr-2">
+      <p class="text-xs text-(--text-2)">PROJECTS</p>
+      <p class="text-xs text-(--text-2)">{{projectService.projects().length}}</p>
+    </div>
+    @if (projectsError().length > 0) {
+      <div class="error-field">{{projectsError()}}</div>
+    }
+    @for (p of projectService.projects(); track p.id) {
+      <button [class.active]="projectId() == p.id" (click)="openProject(p.id)" class="project">
+        <p>{{p.name}}</p>
+        <p class="text-(--text-2)">{{p.domain}}</p>
+      </button>
+    } @empty {
+      @if (projectsError().length === 0) {
+        <p class="text-(--text-2) text-xs text-center mt-2">No projects yet</p>
+      }
+    }
+  </div>
+  <div class="p-4">
+    <div class="flex justify-between items-center p-4 border border-(--border) rounded-lg">
+      <p>{{authService.user()?.email}}</p>
+      <svg lucideSettings class="hover:cursor-pointer" (click)="openSettings()"></svg>
+    </div>
+  </div>
+</div>
+
+
+
+<!--{{projectService.projects() | json}}-->

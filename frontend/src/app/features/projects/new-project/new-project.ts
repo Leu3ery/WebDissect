@@ -1,0 +1,79 @@
+import {Component, inject, output, signal} from '@angular/core';
+import {LucideKey, LucideUpload} from '@lucide/angular';
+import {DecimalPipe} from '@angular/common';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ProjectCreateI, ProjectsService} from '../projects-service';
+import {Router} from '@angular/router';
+
+@Component({
+  selector: 'app-new-project',
+  imports: [
+    LucideUpload,
+    DecimalPipe,
+    ReactiveFormsModule,
+  ],
+  templateUrl: './new-project.html',
+  styleUrl: './new-project.css',
+})
+export class NewProject {
+  closeProject = output();
+  selectedFile = signal<null | File>(null)
+  projectService = inject(ProjectsService)
+  router = inject(Router)
+  error = signal('')
+  loading = signal(false)
+
+  fb = new FormBuilder();
+  form = this.fb.group({
+    name: ['', Validators.required],
+    domain: ['', [Validators.required, Validators.pattern('([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?')]],
+    har: [''],
+  })
+
+  onFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.item(0)
+    if (file) {
+      this.selectedFile.set(file);
+    }
+  }
+
+  getFileSize() {
+    return this.selectedFile() != null ? this.selectedFile()!.size / 1000 / 1000 : 0
+  }
+
+  getFileName() {
+    return this.selectedFile() != null ? this.selectedFile()!.name : 'no file';
+  }
+
+  createNewProject() {
+    if (this.form.invalid || this.loading()) {
+      return
+    }
+
+    const {name, domain} = this.form.getRawValue()
+    const project: ProjectCreateI = {
+      name: name!,
+      domain: domain!,
+    }
+
+    this.error.set('')
+    this.loading.set(true)
+    this.projectService.createProjectWithAnalysis(project, this.selectedFile()).subscribe({
+      next: res => {
+        this.loading.set(false)
+        if (!res.isSuccess) {
+          this.error.set(res.message)
+        } else {
+          this.projectService.getProjects().subscribe()
+          this.router.navigate(['/projects', res.data.id])
+          this.closeProject.emit()
+        }
+      },
+      error: () => {
+        this.loading.set(false)
+        this.error.set('Could not create project. Please try again.')
+      },
+    })
+  }
+}

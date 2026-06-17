@@ -1,0 +1,35 @@
+<div class="p-4 flex flex-col w-full gap-2">
+  <div class="flex items-center gap-4">
+    <svg lucideUpload size="16px" color="var(--accent)"></svg>
+    <p class="text-lg">New project</p>
+  </div>
+  <form [formGroup]="form" (ngSubmit)="createNewProject()">
+    <label class="text-(--text-2) text-xs" for="name">PROJECT NAME</label>
+    <input formControlName="name" class="input" name="name" type="text" id="name" placeholder="Project name">
+    @if (form.controls.name.invalid && form.controls.name.touched) {
+      <div class="error-field">Name is required!</div>
+    }
+    <label class="text-(--text-2) text-xs" for="url">TARGET DOMAIN</label>
+    <input formControlName="domain" class="input" name="domain" type="text" id="domain" placeholder="htlstp.at">
+    @if (form.controls.domain.invalid && form.controls.domain.touched) {
+      <div class="error-field">Domain is required!</div>
+    }
+    <label class="text-(--text-2) text-xs" for="har">HAR FILE</label>
+    <label class="har-input" for="har">
+      <svg lucideUpload size="24px" color="var(--text-2)"></svg>
+      @if (selectedFile()) {
+        <p>{{getFileName()}}</p>
+        <p class="text-(--text-2) text-xs">{{getFileSize() | number}} MB • Ready to analyse</p>
+      } @else {
+        <p>Drop a .har file of browse</p>
+        <p class="text-(--text-2) text-xs">Max 25 MB • Captured from DevTools › Network › Export HAR</p>
+      }
+    </label>
+    <input formControlName="har" class="hidden" type="file" name="har" id="har" accept=".har" (change)="onFileChange($event)">
+    @if (error().length > 0) {
+      <div class="error-field">{{error()}}</div>
+    }
+    <button [disabled]="form.invalid || loading()" class="btn btn-primary mt-4 w-full" type="submit">{{ loading() ? 'Creating…' : 'Go to analyse' }}</button>
+  </form>
+</div>
+
