@@ -12,13 +12,26 @@ services:
             context: .
             dockerfile: backend/server/Dockerfile
         restart: unless-stopped
+        networks:
+            - web
 
     frontend-server:
-        ports:
-            - "8080:80"
+        # No host port publish: Traefik (Dokploy) reaches the container on
+        # port 80 over the dokploy-network. Publishing a host port here only
+        # risks clashing with other Dokploy apps.
+        expose:
+            - "80"
         build:
             context: ./frontend
             dockerfile: Dockerfile
         depends_on:
             -   backend-server
         restart: unless-stopped
+        networks:
+            - web              # talk to backend-server (nginx proxy_pass)
+            - dokploy-network  # be reachable by Dokploy's Traefik
+
+networks:
+    web:
+    dokploy-network:
+        external: true
