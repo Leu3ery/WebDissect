@@ -28,3 +28,7 @@ class ProjectsData(BaseResponse[Projects]):
     data: Projects
 
 
+class ProjectData(BaseResponse[Project]):
+    data: Project
+
+

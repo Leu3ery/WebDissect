@@ -15,7 +15,11 @@ async def _db(request: Request, exc: DBError):
 
 
 def setup_router(subrouters: list[APIRouter]) -> FastAPI:
-    app = FastAPI()
+    app = FastAPI(
+        docs_url="/api/docs",
+        redoc_url="/api/redoc",
+        openapi_url="/api/openapi.json",
+    )
 
     # Register exception handlers
     app.add_exception_handler(DBIntegrityError, _integrity)

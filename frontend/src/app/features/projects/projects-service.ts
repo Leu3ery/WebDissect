@@ -74,26 +74,26 @@ export class ProjectsService {
   private _projects = signal<ProjectI[]>([])
   readonly projects = this._projects.asReadonly()
 
-  getProjects(): Observable<ApiResponse<ProjectI[]>> {
-    // return this.http.get<ApiResponse<ProjectI[]>>(`${config.apiUrl}/me`).pipe(
-    //   tap(res => {
-    //     if (res.isSuccess) {
-    //       this._projects.set(res.data)
-    //     }
-    //   })
-    // );
-    return of<ApiResponse<ProjectI[]>>({
-      data: [
-        {id: 1, name: "project 1", domain: "test.com", user_id: 1},
-        {id: 2, name: "project 2", domain: "webdissect.online", user_id: 1},
-      ],
-      message: "test",
-      isSuccess: true,
-    }).pipe(delay(400), tap(res => {
-      if (res.isSuccess) {
-        this._projects.set(res.data)
-      }
-    }));
+  getProjects(): Observable<ApiResponse<{projects: ProjectI[]}>> {
+    return this.http.get<ApiResponse<{projects: ProjectI[]}>>(`${config.apiUrl}/projects`).pipe(
+      tap(res => {
+        if (res.isSuccess) {
+          this._projects.set(res.data.projects)
+        }
+      })
+    );
+    // return of<ApiResponse<ProjectI[]>>({
+    //   data: [
+    //     {id: 1, name: "project 1", domain: "test.com", user_id: 1},
+    //     {id: 2, name: "project 2", domain: "webdissect.online", user_id: 1},
+    //   ],
+    //   message: "test",
+    //   isSuccess: true,
+    // }).pipe(delay(400), tap(res => {
+    //   if (res.isSuccess) {
+    //     this._projects.set(res.data)
+    //   }
+    // }));
   }
 
   getProjectById(id: number): Observable<ApiResponse<ProjectFullI>> {
@@ -151,19 +151,19 @@ export class ProjectsService {
   }
 
   createProject(project: ProjectCreateI): Observable<ApiResponse<ProjectI>> {
-    // return this.http.post<ApiResponse<ProjectI>>(`${config.apiUrl}/projects`, project);
-    return of<ApiResponse<ProjectI>>({
-      data: {id: 2, name: project.name, domain: project.domain, user_id: 1},
-      message: "test",
-      isSuccess: true,
-    }).pipe(delay(400))
+    return this.http.post<ApiResponse<ProjectI>>(`${config.apiUrl}/projects`, project);
+    // return of<ApiResponse<ProjectI>>({
+    //   data: {id: 2, name: project.name, domain: project.domain, user_id: 1},
+    //   message: "test",
+    //   isSuccess: true,
+    // }).pipe(delay(400))
   }
 
   uploadHar(id: number, har: File): Observable<ApiResponse<null>> {
-    // const formData = new FormData();
-    // formData.append('file', har);
-    // return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/upload`, formData);
-    return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true}).pipe(delay(400))
+    const formData = new FormData();
+    formData.append('file', har);
+    return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/upload`, formData);
+    // return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true}).pipe(delay(400))
   }
 
   updateProject(id: number, project: ProjectUpdateI): Observable<ApiResponse<ProjectI>> {
@@ -176,8 +176,8 @@ export class ProjectsService {
   }
 
   startAnalysis(id: number): Observable<ApiResponse<null>> {
-    // return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/analysis/start`, {});
-    return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true}).pipe(delay(400))
+    return this.http.post<ApiResponse<null>>(`${config.apiUrl}/projects/${id}/analysis/start`, {});
+    // return of<ApiResponse<null>>({data: null, message: "test", isSuccess: true}).pipe(delay(400))
   }
 
   // Creating a project is a 3-step flow: create the project, upload the HAR

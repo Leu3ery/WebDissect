@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 import tldextract
 
 
@@ -8,6 +8,8 @@ _extract = tldextract.TLDExtract(suffix_list_urls=())
 
 
 class Project(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int | None      = Field(description="Project ID", default=None)
     name: str           = Field(description="Project Name")
     domain: str         = Field(description="Domain of the analyzed website")

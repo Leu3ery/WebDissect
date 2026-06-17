@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
 
 from app.api.schemas import BaseResponse, AnalysisStartData, project
 from app.api.schemas import Project, DNSEntry, DNSEntryType
-from app.api.schemas._responses import AnalysisStart, Projects
+from app.api.schemas._responses import AnalysisStart, ProjectsData, ProjectData
 from app.db import db_handler
 from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
@@ -70,7 +70,7 @@ def _fetch_cert(domain: str, analysis_id: int):
 
 
 
-@projects.get("", response_model=Projects)
+@projects.get("", response_model=ProjectsData)
 def get_projects():
     # TODO: implement auth
 
@@ -79,10 +79,9 @@ def get_projects():
         return BaseResponse(data={"projects" : [Project.model_validate(p) for p in projects]})
 
 
-@projects.post("")
+@projects.post("", response_model=ProjectData)
 def create_project(create_project: Project):
     # TODO: implement auth
-    project_id = None
     with db_handler.transaction() as db:
         project = DB_Project(
             name=create_project.name,
@@ -92,9 +91,11 @@ def create_project(create_project: Project):
         )
         db.add(project)
         db.flush()
-        project_id = project.id
+        # Validate while the session is open; the ORM object is expired
+        # after the transaction commits.
+        created = Project.model_validate(project)
 
-    return BaseResponse(data={"projectId" : project_id})  # only for testing
+    return BaseResponse(data=created)
 
 
 @projects.patch("/{project_id}")

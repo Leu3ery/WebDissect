@@ -10,8 +10,8 @@ services:
             context: .
             dockerfile: backend/server/Dockerfile
     frontend-server:
-        expose:
-            - "80"
+        ports:
+            - "80:80"
         build:
             context: ./frontend
             dockerfile: Dockerfile
