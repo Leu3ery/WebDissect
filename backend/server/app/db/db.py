@@ -20,9 +20,9 @@ class DBConnectionError(DBError):
 
 
 class DBHandler:
-    def __init__(self, url: str | None = None):
+    def __init__(self):
         self.engine = create_engine(
-            url or ("sqlite:////app/db/" + get_settings().DB_FILENAME),
+            f"sqlite:////app/storage/{get_settings().DB_FILENAME}",
             pool_pre_ping=True,
         )
         self.SessionLocal = sessionmaker(
