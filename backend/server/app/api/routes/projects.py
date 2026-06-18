@@ -3,11 +3,12 @@ from uuid import uuid4
 from pathlib import Path
 import json
 
-from app.api.schemas import BaseResponse, CreateProject, AnalysisStart, Projects, FileUpload
+from app.api.schemas import PatchProject
+from app.api.schemas import BaseResponse, CreateProject, AnalysisStart, ProjectWithAnalysisId, FileUpload
 from app.api.schemas import Project, DNSEntry, DNSEntryType
 from app.config import get_settings
 from app.db import db_handler
-from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile
+from app.db.models import Certificate, Analysis as DB_Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile
 from app.tools.har import validate_har
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
 from app.tools.tls_cert import fetch_cert, parse_cert
@@ -59,7 +60,7 @@ def _fetch_dns(domain: str, analysis_id: int):
 
     # Mark DNS Analysis as completed
     with db_handler.transaction() as db:
-        db.get(Analysis, analysis_id).is_dns_analysis_completed = True
+        db.get(DB_Analysis, analysis_id).is_dns_analysis_completed = True
 
 
 def _fetch_cert(domain: str, analysis_id: int):
@@ -76,20 +77,28 @@ def _fetch_cert(domain: str, analysis_id: int):
 
     # Mark Certificate Analysis as completed
     with db_handler.transaction() as db:
-        db.get(Analysis, analysis_id).is_certificate_analysis_completed = True
+        db.get(DB_Analysis, analysis_id).is_certificate_analysis_completed = True
 
 
 
-@projects.get("", response_model=BaseResponse[Projects])
+@projects.get("", response_model=BaseResponse[list[ProjectWithAnalysisId]])
 def get_projects():
     # TODO: implement auth
 
+    projects = []
     with db_handler.transaction() as db:
-        projects = db.query(DB_Project).all()
-        proj = [Project.model_validate(p) for p in projects]
+        for p in db.query(DB_Project).all():
+            p = Project.model_validate(p)
 
-        # TODO: add lastest analysis id per project
-        return BaseResponse.ok(Projects(projects=proj))
+            latest_analysis = db.query(DB_Analysis).where(DB_Analysis.project_id == p.id).order_by(DB_Analysis.started_at.desc()).first()
+            id_ = latest_analysis.id if latest_analysis else None
+
+            projects.append(ProjectWithAnalysisId(
+                project=p,
+                analysis_id=id_
+            ))
+
+    return BaseResponse.ok(projects)
 
 
 
@@ -111,14 +120,17 @@ def create_project(create_project: Project):
     return BaseResponse.ok(CreateProject(project_id=project_id))
 
 
-# TODO: require only new domain OR name
+
 @projects.patch("/{project_id}", response_model=BaseResponse[None])
-def update_project(project_id: int, patch_project: Project):
+def update_project(project_id: int, patch_project: PatchProject):
     # TODO: implement auth
+
     with db_handler.transaction() as db:
         proj = db.get(DB_Project, project_id)
-        proj.domain = patch_project.domain
-        proj.name = patch_project.name
+        if patch_project.domain:
+            proj.domain = patch_project.domain
+        if patch_project.name:
+            proj.name = patch_project.name
 
     return BaseResponse.ok()
 
@@ -192,7 +204,7 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
 
     # Create new analysis in DB
     with db_handler.transaction() as db:
-        analysis = Analysis(
+        analysis = DB_Analysis(
             project_id=project_id
         )
         db.add(analysis)
