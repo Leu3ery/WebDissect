@@ -143,8 +143,6 @@ def create_project(create_project: Project):
         project = DB_Project(
             name=create_project.name,
             domain=create_project.domain,
-            # user_id=user.id
-            user_id=1   # only for testing
         )
         db.add(project)
         db.flush()
