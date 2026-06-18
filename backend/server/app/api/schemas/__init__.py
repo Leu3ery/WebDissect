@@ -1,4 +1,6 @@
-from ._responses import BaseResponse, AnalysisStartData
+from ._responses import BaseResponse, CreateProject, AnalysisStart, ProjectWithAnalysisId, FileUpload
+from ._requests import PatchProject
+from .analysis import Analysis
 from .certificate import Certificate
 from .dns_entry import DNSEntry, DNSEntryType
 from .endpoint import Endpoint
