@@ -1,9 +1,11 @@
 from functools import lru_cache
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
     RESEND_KEY: str = Field()
     JWT_ALGORITHM: str = Field()
     JWT_SECRET: str = Field()

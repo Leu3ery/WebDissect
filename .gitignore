@@ -69,4 +69,19 @@ desktop.ini
 # ========================
 *.log
 logs/
-npm-debug.log*node_modules/
+npm-debug.log*
+
+# ========================
+# Node (root)
+# ========================
+node_modules/
+
+# ========================
+# Claude Code / tooling
+# ========================
+.claude/
+
+# ========================
+# Local database
+# ========================
+db/
