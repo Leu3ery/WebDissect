@@ -14,7 +14,8 @@ from dns.exception import Timeout
 
 import app.tools._dns as dns_service
 from app.tools._dns import _query
-from app.api.schemas.dns_entry import DNSEntry, EntryType
+from app.api.schemas.dns_entry import DNSEntry, DNSEntryType
+
 
 
 # --------------------------------------------------------------------------- #
@@ -90,22 +91,22 @@ def srv_rdata(priority, weight, port, target):
 class TestSrvValidation:
     def test_srv_without_service_raises(self):
         with pytest.raises(ValueError):
-            _query("example.com", EntryType.SRV, service=None, proto="tcp")
+            _query("example.com", DNSEntryType.SRV, service=None, proto="tcp")
 
     def test_srv_without_proto_raises(self):
         with pytest.raises(ValueError):
-            _query("example.com", EntryType.SRV, service="minecraft", proto=None)
+            _query("example.com", DNSEntryType.SRV, service="minecraft", proto=None)
 
     def test_srv_without_both_raises(self):
         with pytest.raises(ValueError):
-            _query("example.com", EntryType.SRV)
+            _query("example.com", DNSEntryType.SRV)
 
 
 # --------------------------------------------------------------------------- #
 # Per-record-type parsing
 # --------------------------------------------------------------------------- #
 class TestRecordParsing:
-    @pytest.mark.parametrize("rtype", [EntryType.IPv4, EntryType.IPv6])
+    @pytest.mark.parametrize("rtype", [DNSEntryType.IPv4, DNSEntryType.IPv6])
     def test_address_records(self, resolver, rtype):
         resolver.resolve.return_value = FakeAnswer([a_rdata("93.184.216.34")], ttl=120)
         result = _query("example.com", rtype)
@@ -123,22 +124,22 @@ class TestRecordParsing:
         resolver.resolve.return_value = FakeAnswer(
             [a_rdata("1.1.1.1"), a_rdata("8.8.8.8")]
         )
-        result = _query("example.com", EntryType.IPv4)
+        result = _query("example.com", DNSEntryType.IPv4)
         assert [e.value for e in result] == ["1.1.1.1", "8.8.8.8"]
 
     def test_mx_record(self, resolver):
         resolver.resolve.return_value = FakeAnswer([mx_rdata(10, "mail.example.com.")])
-        result = _query("example.com", EntryType.MX)
+        result = _query("example.com", DNSEntryType.MX)
         assert result[0].value == "Preference: 10, Mail Domain: mail.example.com."
 
     def test_ns_record(self, resolver):
         resolver.resolve.return_value = FakeAnswer([target_rdata("ns1.example.com.")])
-        result = _query("example.com", EntryType.NS)
+        result = _query("example.com", DNSEntryType.NS)
         assert result[0].value == "ns1.example.com."
 
     def test_cname_record(self, resolver):
         resolver.resolve.return_value = FakeAnswer([target_rdata("alias.example.com.")])
-        result = _query("www.example.com", EntryType.CNAME)
+        result = _query("www.example.com", DNSEntryType.CNAME)
         assert result[0].value == "alias.example.com."
 
     def test_txt_record_joins_and_decodes(self, resolver):
@@ -146,12 +147,12 @@ class TestRecordParsing:
         resolver.resolve.return_value = FakeAnswer(
             [txt_rdata(b"v=spf1 ", b"include:_spf.example.com ~all")]
         )
-        result = _query("example.com", EntryType.TXT)
+        result = _query("example.com", DNSEntryType.TXT)
         assert result[0].value == "v=spf1 include:_spf.example.com ~all"
 
     def test_soa_record(self, resolver):
         resolver.resolve.return_value = FakeAnswer([soa_rdata()], ttl=86400)
-        result = _query("example.com", EntryType.SOA)
+        result = _query("example.com", DNSEntryType.SOA)
 
         expected = (
             "Master NS: ns1.example.com., Email: hostmaster.example.com., "
@@ -170,7 +171,7 @@ class TestSrv:
         resolver.resolve.return_value = FakeAnswer(
             [srv_rdata(10, 5, 25565, "mc.example.com.")]
         )
-        result = _query("example.com", EntryType.SRV, service="minecraft", proto="tcp")
+        result = _query("example.com", DNSEntryType.SRV, service="minecraft", proto="tcp")
 
         # Correct DNS label is built for the lookup...
         resolver.resolve.assert_called_once_with("_minecraft._tcp.example.com", "SRV")
@@ -183,7 +184,7 @@ class TestSrv:
         resolver.resolve.return_value = FakeAnswer(
             [srv_rdata(0, 0, 443, "svc.example.com.")]
         )
-        _query("https://example.com", EntryType.SRV, service="sip", proto="udp")
+        _query("https://example.com", DNSEntryType.SRV, service="sip", proto="udp")
         resolver.resolve.assert_called_once_with("_sip._udp.example.com", "SRV")
 
 
@@ -194,12 +195,12 @@ class TestErrorHandling:
     @pytest.mark.parametrize("exc", [NoAnswer, NXDOMAIN, NoNameservers, Timeout])
     def test_swallowed_dns_errors_return_empty(self, resolver, exc):
         resolver.resolve.side_effect = exc
-        assert _query("example.com", EntryType.IPv4) == []
+        assert _query("example.com", DNSEntryType.IPv4) == []
 
     def test_unexpected_error_is_not_swallowed(self, resolver):
         # Only the four DNS exceptions are caught; anything else should propagate.
         resolver.resolve.side_effect = RuntimeError("boom")
         with pytest.raises(RuntimeError):
-            _query("example.com", EntryType.IPv4)
+            _query("example.com", DNSEntryType.IPv4)
 
 
