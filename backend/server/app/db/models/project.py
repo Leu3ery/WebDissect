@@ -13,5 +13,5 @@ class Project(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     user         = relationship("User", back_populates="projects")
-    project_hars = relationship("ProjectHar", back_populates="project")
+    project_hars = relationship("HarFile", back_populates="project")
 
