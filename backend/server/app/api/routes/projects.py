@@ -3,9 +3,8 @@ from uuid import uuid4
 from pathlib import Path
 import json
 
-from app.api.schemas import BaseResponse, AnalysisStartData
+from app.api.schemas import BaseResponse, CreateProject, AnalysisStart, Projects, FileUpload
 from app.api.schemas import Project, DNSEntry, DNSEntryType
-from app.api.schemas._responses import AnalysisStart, Projects
 from app.config import get_settings
 from app.db import db_handler
 from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile
@@ -81,16 +80,20 @@ def _fetch_cert(domain: str, analysis_id: int):
 
 
 
-@projects.get("", response_model=Projects)
+@projects.get("", response_model=BaseResponse[Projects])
 def get_projects():
     # TODO: implement auth
 
     with db_handler.transaction() as db:
         projects = db.query(DB_Project).all()
-        return BaseResponse(data={"projects" : [Project.model_validate(p) for p in projects]})
+        proj = [Project.model_validate(p) for p in projects]
+
+        # TODO: add lastest analysis id per project
+        return BaseResponse.ok(Projects(projects=proj))
 
 
-@projects.post("")
+
+@projects.post("", response_model=BaseResponse[CreateProject])
 def create_project(create_project: Project):
     # TODO: implement auth
     project_id = None
@@ -105,10 +108,11 @@ def create_project(create_project: Project):
         db.flush()
         project_id = project.id
 
-    return BaseResponse(data={"projectId" : project_id})  # only for testing
+    return BaseResponse.ok(CreateProject(project_id=project_id))
 
 
-@projects.patch("/{project_id}")
+# TODO: require only new domain OR name
+@projects.patch("/{project_id}", response_model=BaseResponse[None])
 def update_project(project_id: int, patch_project: Project):
     # TODO: implement auth
     with db_handler.transaction() as db:
@@ -116,11 +120,11 @@ def update_project(project_id: int, patch_project: Project):
         proj.domain = patch_project.domain
         proj.name = patch_project.name
 
-    return BaseResponse(data={})
+    return BaseResponse.ok()
 
 
 
-@projects.post("/{project_id}/upload")
+@projects.post("/{project_id}/upload", response_model=BaseResponse[FileUpload], operation_id="upload_har")
 def upload_file(project_id: int, file: UploadFile):
     # TODO: implement auth
 
@@ -170,13 +174,11 @@ def upload_file(project_id: int, file: UploadFile):
         )
         db.add(har_file)
 
-
-    return BaseResponse(data={"entry_count" : entry_count})  # temp
-    # TODO: return entry_count as debug info to be displayed on the frontend
+    return BaseResponse.ok(FileUpload(entry_count=entry_count))
 
 
 
-@projects.post("/{project_id}/analysis/start", response_model=BaseResponse[AnalysisStartData])
+@projects.post("/{project_id}/analysis/start", response_model=BaseResponse[AnalysisStart])
 def start_analysis(project_id: int, bg: BackgroundTasks):
     # TODO: implement auth
 
@@ -201,5 +203,5 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
     # Start analysis and return analysis id
     bg.add_task(_fetch_dns, project_domain, analysis_id)
     bg.add_task(_fetch_cert, project_domain, analysis_id)
-    return AnalysisStart(data=AnalysisStartData(analysis_id=analysis_id))
+    return BaseResponse.ok(AnalysisStart(analysis_id=analysis_id))
 
