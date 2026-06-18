@@ -23,4 +23,4 @@ def validate_har(path: Path) -> int:
     v = log.get("version")
     if v not in {"1.1", "1.2", None}:
         raise ValueError(f"unsupported HAR version {v}")
-
+    return len(data.get("log", {}).get("entries", []))
