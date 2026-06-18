@@ -180,6 +180,17 @@ def create_project(client: APIClient, name: str = "Test", domain: str = "example
     return data["projectId"]
 
 
+def wait_for_json(client: APIClient, path: str, predicate, timeout: float = 3.0):
+    deadline = time.time() + timeout
+    response = client.get(path)
+    while time.time() < deadline:
+        if response.status_code == 200 and predicate(response.json()):
+            return response
+        time.sleep(0.05)
+        response = client.get(path)
+    return response
+
+
 def test_auth_endpoints_are_not_implemented(client: APIClient):
     requests = [
         ("post", "/api/auth/register", {"email": "tester@example.com"}),
@@ -265,6 +276,65 @@ def test_upload_har_accepts_valid_har(client: APIClient, tmp_path, monkeypatch):
     assert data == {"entryCount": 2}
 
 
+def upload_valid_har(client: APIClient, project_id: int, tmp_path, monkeypatch) -> None:
+    import app.api.routes.projects as project_routes
+
+    har_path = tmp_path / "capture.har"
+    har_path.write_text(
+        json_har([
+            {
+                "request": {
+                    "method": "GET",
+                    "url": "https://example.com/api/users?active=true",
+                },
+                "response": {
+                    "status": 200,
+                    "content": {"mimeType": "application/json; charset=utf-8"},
+                },
+            },
+            {
+                "request": {
+                    "method": "POST",
+                    "url": "https://example.com/api/users",
+                },
+                "response": {
+                    "status": 201,
+                    "content": {"mimeType": "application/json"},
+                },
+            },
+            {
+                "request": {
+                    "method": "GET",
+                    "url": "https://example.com/api/users?page=2",
+                },
+                "response": {
+                    "status": 304,
+                    "content": {"mimeType": "text/plain"},
+                },
+            },
+        ]),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(project_routes, "validate_har", lambda path: 3)
+
+    with har_path.open("rb") as har:
+        assert_base_response(client.post(
+            f"/api/projects/{project_id}/upload",
+            files={"file": ("capture.har", har, "application/json")},
+        ))
+
+
+def json_har(entries: list[dict]) -> str:
+    import json
+
+    return json.dumps({
+        "log": {
+            "version": "1.2",
+            "entries": entries,
+        },
+    })
+
+
 def test_upload_har_rejects_unknown_project(client: APIClient, tmp_path):
     har_path = tmp_path / "capture.har"
     har_path.write_text('{"log": {"entries": []}}', encoding="utf-8")
@@ -336,6 +406,36 @@ def test_start_analysis_creates_analysis_and_tool_results(client: APIClient):
     assert cert_payload["fingerprint_sha256"] == f"{analysis_id:064x}"
 
 
+def test_start_analysis_parses_uploaded_har_endpoints(client: APIClient, tmp_path, monkeypatch):
+    project_id = create_project(client)
+    upload_valid_har(client, project_id, tmp_path, monkeypatch)
+
+    start_data = assert_base_response(client.post(f"/api/projects/{project_id}/analysis/start"))
+    analysis_id = start_data["analysisId"]
+
+    response = wait_for_json(client, f"/api/har/{analysis_id}", bool)
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "id": 1,
+            "analysis_id": analysis_id,
+            "method": "GET",
+            "path": "/api/users",
+            "status": 200,
+            "content_type": "application/json",
+        },
+        {
+            "id": 2,
+            "analysis_id": analysis_id,
+            "method": "POST",
+            "path": "/api/users",
+            "status": 201,
+            "content_type": "application/json",
+        },
+    ]
+
+
 def test_start_analysis_rejects_unknown_project(client: APIClient):
     response = client.post("/api/projects/999/analysis/start")
 
@@ -346,8 +446,11 @@ def test_start_analysis_rejects_unknown_project(client: APIClient):
 def test_tools_return_empty_results_for_unknown_analysis(client: APIClient):
     dns_response = client.get("/api/dns/999")
     tls_response = client.get("/api/tls/999")
+    har_response = client.get("/api/har/999")
 
     assert dns_response.status_code == 200
     assert dns_response.json() == []
     assert tls_response.status_code == 200
     assert tls_response.json() is None
+    assert har_response.status_code == 200
+    assert har_response.json() == []
