@@ -8,7 +8,7 @@ from app.api.schemas import BaseResponse, CreateProject, AnalysisStart, ProjectW
 from app.api.schemas import Project, DNSEntry, DNSEntryType, Endpoint
 from app.config import get_settings
 from app.db import db_handler
-from app.db.models import Certificate, Analysis as DB_Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile, Endpoint as DB_Endpoint
+from app.db.models import Certificate as DB_Certificate, Analysis as DB_Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile, Endpoint as DB_Endpoint
 from app.tools.har import validate_har, parse_hars
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
 from app.tools.tls_cert import fetch_cert, parse_cert
@@ -71,7 +71,7 @@ def _fetch_cert(domain: str, analysis_id: int):
 
     with db_handler.transaction() as db:
         # Delete last certificate and replace with current one
-        db.query(Certificate).delete(synchronize_session=False)
+        db.query(DB_Certificate).delete(synchronize_session=False)
         db.add(cert)
 
     # TODO: remove
@@ -250,4 +250,30 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
     bg.add_task(_fetch_cert, project_domain, analysis_id)
     bg.add_task(_analyze_har, project_id, analysis_id)
     return BaseResponse.ok(AnalysisStart(analysis_id=analysis_id))
+
+
+
+@projects.delete("/{project_id}", response_model=BaseResponse[None])
+def delete_project(project_id: int):
+    with db_handler.transaction() as db:
+        project = db.get(DB_Project, project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+        analyses = db.query(DB_Analysis).filter(DB_Analysis.project_id == project_id).all()
+        for analysis in analyses:
+            db.query(DB_Endpoint).filter(DB_Endpoint.analysis_id == analysis.id).delete(synchronize_session=False)
+            db.query(DB_DNSEntry).filter(DB_DNSEntry.analysis_id == analysis.id).delete(synchronize_session=False)
+            db.query(DB_Certificate).filter(DB_Certificate.analysis_id == analysis.id).delete(synchronize_session=False)
+            db.delete(analysis)
+
+        har_files = db.query(DB_HarFile).filter(DB_HarFile.project_id == project_id).all()
+        for har_file in har_files:
+            (UPLOAD_DIR / har_file.filename).unlink(missing_ok=True)
+            db.delete(har_file)
+
+        db.delete(project)
+
+    return BaseResponse.ok()
+
 
