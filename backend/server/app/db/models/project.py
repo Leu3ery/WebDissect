@@ -14,4 +14,4 @@ class Project(Base):
 
     user         = relationship("User", back_populates="projects")
     project_hars = relationship("HarFile", back_populates="project")
-
+    analyses     = relationship("Analysis", back_populates="project")
