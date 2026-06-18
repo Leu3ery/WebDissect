@@ -5,11 +5,11 @@ import json
 
 from app.api.schemas import PatchProject
 from app.api.schemas import BaseResponse, CreateProject, AnalysisStart, ProjectWithAnalysisId, FileUpload
-from app.api.schemas import Project, DNSEntry, DNSEntryType
+from app.api.schemas import Project, DNSEntry, DNSEntryType, Endpoint
 from app.config import get_settings
 from app.db import db_handler
-from app.db.models import Certificate, Analysis as DB_Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile
-from app.tools.har import validate_har
+from app.db.models import Certificate, Analysis as DB_Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile, Endpoint as DB_Endpoint
+from app.tools.har import validate_har, parse_hars
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
 from app.tools.tls_cert import fetch_cert, parse_cert
 
@@ -74,10 +74,43 @@ def _fetch_cert(domain: str, analysis_id: int):
         db.query(Certificate).delete(synchronize_session=False)
         db.add(cert)
 
-
+    # TODO: remove
     # Mark Certificate Analysis as completed
     with db_handler.transaction() as db:
         db.get(DB_Analysis, analysis_id).is_certificate_analysis_completed = True
+
+
+def _analyze_har(project_id: int, analysis_id: int):
+    with db_handler.transaction() as db:
+        har_files = db.query(DB_HarFile).where(DB_HarFile.project_id == project_id).all()
+        filenames: list[str] = [f.filename for f in har_files]
+
+    har_data = []
+    for f in filenames:
+        file = UPLOAD_DIR / f
+        try:
+            text = file.read_text()
+            har_data.append(json.loads(text))
+        except Exception as e:
+            print("ERROR parsing HAR file:")
+            print(e)
+            continue
+
+    endpoints: list[Endpoint] = parse_hars(har_data, analysis_id)
+
+    with db_handler.transaction() as db:
+        db.query(DB_Endpoint).where(DB_Endpoint.analysis_id == analysis_id).delete(synchronize_session=False)
+
+        for endpoint in endpoints:
+            e = DB_Endpoint(
+                analysis_id=analysis_id,
+                method=endpoint.method,
+                path=endpoint.path,
+                status=endpoint.status,
+                content_type=endpoint.content_type
+            )
+            db.add(e)
+
 
 
 
@@ -168,7 +201,7 @@ def upload_file(project_id: int, file: UploadFile):
                 out.write(chunk)
 
             entry_count = validate_har(dest)
-    except (json.JSONDecodeError, KeyError, TypeError):
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):  # catch ValueError from validate_har
         dest.unlink(missing_ok=True)
         raise HTTPException(status_code=422, detail="Not a valid HAR file")
     except Exception:
@@ -215,5 +248,6 @@ def start_analysis(project_id: int, bg: BackgroundTasks):
     # Start analysis and return analysis id
     bg.add_task(_fetch_dns, project_domain, analysis_id)
     bg.add_task(_fetch_cert, project_domain, analysis_id)
+    bg.add_task(_analyze_har, project_id, analysis_id)
     return BaseResponse.ok(AnalysisStart(analysis_id=analysis_id))
 
