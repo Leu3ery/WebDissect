@@ -28,8 +28,9 @@ class AnalysisStart(BaseModel):
     analysis_id: int = Field(serialization_alias="analysisId")
 
 
-class Projects(BaseModel):
-    projects: list[Project] = Field()
+class ProjectWithAnalysisId(BaseModel):
+    project: Project        = Field(description="Project")
+    analysis_id: int | None = Field(description="Latest analysis id", default=None)
 
 
 class FileUpload(BaseModel):
