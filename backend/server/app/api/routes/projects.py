@@ -1,12 +1,23 @@
 from fastapi import APIRouter, UploadFile, BackgroundTasks, HTTPException
+from uuid import uuid4
+from pathlib import Path
+import json
 
-from app.api.schemas import BaseResponse, AnalysisStartData, project
+from app.api.schemas import BaseResponse, AnalysisStartData
 from app.api.schemas import Project, DNSEntry, DNSEntryType
 from app.api.schemas._responses import AnalysisStart, Projects
+from app.config import get_settings
 from app.db import db_handler
-from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry
+from app.db.models import Certificate, Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile
+from app.tools.har import validate_har
 from app.tools._dns import _query, _brute_srv, _dedupe_dns_entries
 from app.tools.tls_cert import fetch_cert, parse_cert
+
+
+# ~~~~~~~~~~ # HAR upload config # ~~~~~~~~~~ #
+MAX_HAR_SIZE = 50 * 1024 * 1024  # 50 MiB
+CHUNK_SIZE = 1024 * 1024
+UPLOAD_DIR = Path(f"/app/storage/{get_settings().HAR_STORAGE_DIR}")
 
 
 projects = APIRouter(prefix="/projects")
@@ -112,7 +123,56 @@ def update_project(project_id: int, patch_project: Project):
 @projects.post("/{project_id}/upload")
 def upload_file(project_id: int, file: UploadFile):
     # TODO: implement auth
-    pass
+
+    # ~~~~~~~~~~ # Validate Upload # ~~~~~~~~~~ #
+    with db_handler.transaction() as db:
+        proj = db.get(DB_Project, project_id)
+        if not proj:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+    if not file.filename or not file.filename.endswith(".har"):
+        raise HTTPException(status_code=400, detail="Invalid file format. Only .har files allowed.")
+
+    if file.size is not None and file.size > MAX_HAR_SIZE:
+        raise HTTPException(status_code=413, detail="File too large")
+
+
+    # ~~~~~~~~~~ # Save har file # ~~~~~~~~~~ #
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    filename = f"{project_id}_{uuid4().hex}.har"
+    dest = UPLOAD_DIR / filename
+
+    written = 0
+    try:
+        with dest.open("wb") as out:
+            while chunk := file.file.read(CHUNK_SIZE):  # sync read; cap enforced as we go
+                written += len(chunk)
+                if written > MAX_HAR_SIZE:
+                    raise HTTPException(status_code=413, detail="File too large")
+                out.write(chunk)
+
+            entry_count = validate_har(dest)
+    except (json.JSONDecodeError, KeyError, TypeError):
+        dest.unlink(missing_ok=True)
+        raise HTTPException(status_code=422, detail="Not a valid HAR file")
+    except Exception:
+        dest.unlink(missing_ok=True)  # cap hit, disk error, etc. — don't leave a bad file behind
+        raise
+    finally:
+        file.file.close()
+
+
+    # ~~~~~~~~~~ # Save har to DB # ~~~~~~~~~~ #
+    with db_handler.transaction() as db:
+        har_file = DB_HarFile(
+            project_id=project_id,
+            filename=filename
+        )
+        db.add(har_file)
+
+
+    return BaseResponse(data={"entry_count" : entry_count})  # temp
+    # TODO: return entry_count as debug info to be displayed on the frontend
 
 
 
