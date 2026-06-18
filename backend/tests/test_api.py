@@ -72,6 +72,9 @@ class APIClient:
     def patch(self, path: str, **kwargs):
         return requests.patch(f"{self.base_url}{path}", timeout=10, **kwargs)
 
+    def delete(self, path: str, **kwargs):
+        return requests.delete(f"{self.base_url}{path}", timeout=10, **kwargs)
+
 
 def get_free_port() -> int:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -434,6 +437,37 @@ def test_start_analysis_parses_uploaded_har_endpoints(client: APIClient, tmp_pat
             "content_type": "application/json",
         },
     ]
+
+
+def test_delete_project_removes_project_files_and_analysis_results(client: APIClient, tmp_path, monkeypatch):
+    import app.api.routes.projects as project_routes
+
+    project_id = create_project(client)
+    upload_valid_har(client, project_id, tmp_path, monkeypatch)
+
+    uploaded_files = list(project_routes.UPLOAD_DIR.iterdir())
+    assert len(uploaded_files) == 1
+
+    start_data = assert_base_response(client.post(f"/api/projects/{project_id}/analysis/start"))
+    analysis_id = start_data["analysisId"]
+    wait_for_json(client, f"/api/har/{analysis_id}", bool)
+
+    data = assert_base_response(client.delete(f"/api/projects/{project_id}"))
+
+    assert data is None
+    assert assert_base_response(client.get("/api/projects")) == []
+    assert client.get(f"/api/dns/{analysis_id}").json() == []
+    assert client.get(f"/api/tls/{analysis_id}").json() is None
+    assert client.get(f"/api/har/{analysis_id}").json() == []
+    assert list(project_routes.UPLOAD_DIR.iterdir()) == []
+    assert client.post(f"/api/projects/{project_id}/analysis/start").status_code == 404
+
+
+def test_delete_project_rejects_unknown_project(client: APIClient):
+    response = client.delete("/api/projects/999")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Project not found"
 
 
 def test_start_analysis_rejects_unknown_project(client: APIClient):
