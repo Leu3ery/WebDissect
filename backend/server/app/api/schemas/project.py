@@ -13,7 +13,6 @@ class Project(BaseModel):
     id: int | None      = Field(description="Project ID", default=None)
     name: str           = Field(description="Project Name")
     domain: str         = Field(description="Domain of the analyzed website")
-    user_id: int | None = Field(description="id of the project owner", default=None)
 
     @field_validator("domain", mode="before")
     @classmethod

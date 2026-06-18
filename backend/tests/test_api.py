@@ -93,7 +93,6 @@ def client(tmp_path, monkeypatch) -> Iterator[APIClient]:
     import app.db as app_db
     import app.api.routes.projects as project_routes
     import app.api.routes.tools as tool_routes
-    from app.db.models import User
     from app.server import app
 
     db_handler = _TestDBHandler(tmp_path / "api.db")
@@ -101,9 +100,6 @@ def client(tmp_path, monkeypatch) -> Iterator[APIClient]:
     monkeypatch.setattr(project_routes, "db_handler", db_handler)
     monkeypatch.setattr(tool_routes, "db_handler", db_handler)
     monkeypatch.setattr(project_routes, "UPLOAD_DIR", tmp_path / "har_files")
-
-    with db_handler.transaction() as db:
-        db.add(User(id=1, email="tester@example.com", password_hash="hash"))
 
     def fake_fetch_dns(domain: str, analysis_id: int) -> None:
         from app.db.models import Analysis, DNSEntry
@@ -194,19 +190,6 @@ def wait_for_json(client: APIClient, path: str, predicate, timeout: float = 3.0)
     return response
 
 
-def test_auth_endpoints_are_not_implemented(client: APIClient):
-    requests = [
-        ("post", "/api/auth/register", {"email": "tester@example.com"}),
-        ("post", "/api/auth/login", {"email": "tester@example.com", "password": "secret"}),
-        ("post", "/api/auth/code/submit", {"email": "tester@example.com", "code": 123456}),
-        ("patch", "/api/auth/me", None),
-    ]
-
-    for method, path, body in requests:
-        response = getattr(client, method)(path, json=body) if body else getattr(client, method)(path)
-        assert response.status_code == 501
-
-
 def test_get_projects_returns_empty_list(client: APIClient):
     assert assert_base_response(client.get("/api/projects")) == []
 
@@ -221,7 +204,6 @@ def test_create_project_normalizes_domain_and_get_projects_returns_it(client: AP
             "id": project_id,
             "name": "Example",
             "domain": "example.com",
-            "user_id": 1,
         },
         "analysis_id": None,
     }]
