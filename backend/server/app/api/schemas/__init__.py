@@ -5,6 +5,5 @@ from .endpoint import Endpoint
 from .har_file import HarFile
 from .pending_verification import PendingVerification
 from .project import Project
-from .project_har import ProjectHar
 from .technology import Technology
 from .user import User
