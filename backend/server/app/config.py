@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str = Field()
 
     DB_FILENAME: str = Field()
-    DATABASE_URL: str | None = Field(default=None)
+    HAR_STORAGE_DIR: str = Field()
 
 
 

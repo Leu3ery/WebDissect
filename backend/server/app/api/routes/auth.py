@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from app.db import db_handler
@@ -19,26 +19,26 @@ class CodeSubmit(BaseModel):
     code: int
 
 
-@auth.post("/register")
+@auth.post("/register", include_in_schema=False)
 def register(register_user: RegisterUser):
-    pass
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED)
 
 
-@auth.post("/login")
+@auth.post("/login", include_in_schema=False)
 def login(login_user: LoginUser):
-    pass
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED)
 
 
-@auth.post("/code/submit")
+@auth.post("/code/submit", include_in_schema=False)
 def submit_code(code_submit: CodeSubmit):
-    pass
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED)
 
 
-@auth.patch("/me")
+@auth.patch("/me", include_in_schema=False)
 def update_user():
     """
     Update user password
     """
-    pass
+    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED)
 
 

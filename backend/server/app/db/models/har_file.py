@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, ForeignKey
 
 from ._base import Base
 
@@ -7,8 +6,6 @@ from ._base import Base
 class HarFile(Base):
     __tablename__ = "har_files"
 
-    id       = Column(Integer, primary_key=True, autoincrement=True)
-    filename = Column(String(30), nullable=False)
-
-    project = relationship("ProjectHar", back_populates="har")
-
+    id         = Column(Integer, primary_key=True, autoincrement=True)
+    filename   = Column(String(30), nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
