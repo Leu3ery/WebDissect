@@ -11,7 +11,7 @@ import {DnsEntryI} from '../../../projects-service';
 export class DnsTab {
   entries = input<DnsEntryI[]>([]);
   filter = signal('ALL');
-  types = ['ALL', 'A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'CAA'];
+  types = ['ALL', 'A', 'AAAA', 'CNAME', 'MX', 'NS', 'SOA', 'SRV', 'TXT', 'CAA'];
 
   rows = computed(() => {
     const f = this.filter();

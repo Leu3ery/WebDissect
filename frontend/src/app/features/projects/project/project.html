@@ -1,45 +1,73 @@
 <div class="flex w-full h-full flex-col">
-  @if (project()) {
+  @if (project(); as p) {
     <div class="header">
       <div class="min-w-0 flex-1">
-        <p class="text-lg truncate">{{project()?.name}}</p>
-        <p class="text-(--text-2) truncate">https://{{project()?.domain}}</p>
+        <p class="text-lg truncate">{{ p.name }}</p>
+        <p class="text-(--text-2) truncate">https://{{ p.domain }}</p>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <input #harInput class="hidden" type="file" accept=".har" (change)="onHarSelected($event)">
-        <button class="btn" type="button" [disabled]="uploading()" (click)="harInput.click()">
-          <svg lucideUpload size="16"></svg>
-          <span class="hidden md:inline">{{ uploading() ? 'Uploading…' : 'Upload HAR' }}</span>
-        </button>
-        <button class="btn btn-primary" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
-          <svg lucidePlay size="16"></svg>
-          <span class="hidden md:inline">{{ analyzing() ? 'Running…' : 'Run Analysis' }}</span>
-        </button>
+        @if (confirmingDelete()) {
+          <span class="text-(--text-2) text-sm hidden md:inline">Delete this project?</span>
+          <button class="btn btn-danger" type="button" [disabled]="deleting()" (click)="confirmDelete()">
+            <svg lucideTrash2 size="16"></svg>
+            <span class="hidden md:inline">{{ deleting() ? 'Deleting…' : 'Confirm' }}</span>
+          </button>
+          <button class="btn" type="button" [disabled]="deleting()" (click)="cancelDelete()">Cancel</button>
+        } @else {
+          <input #harInput class="hidden" type="file" accept=".har" (change)="onHarSelected($event)">
+          <button class="btn" type="button" [disabled]="uploading()" (click)="harInput.click()">
+            <svg lucideUpload size="16"></svg>
+            <span class="hidden md:inline">{{ uploading() ? 'Uploading…' : 'Upload HAR' }}</span>
+          </button>
+          <button class="btn btn-primary" type="button" [disabled]="analyzing()" (click)="runAnalysis()">
+            <svg lucidePlay size="16"></svg>
+            <span class="hidden md:inline">{{ analyzing() ? 'Running…' : 'Run Analysis' }}</span>
+          </button>
+          <button class="btn btn-danger" type="button" title="Delete project" aria-label="Delete project" (click)="requestDelete()">
+            <svg lucideTrash2 size="16"></svg>
+          </button>
+        }
         <svg lucideMenu class="navbar-close-open-button" (click)="openNavLeft()"></svg>
       </div>
     </div>
-  }
-  @if (project(); as p) {
+
     <div class="tabs px-3 md:px-5">
       <button type="button" class="tab" [class.active]="activeTab() === 'dns'" (click)="activeTab.set('dns')">
-        <svg lucideGlobe size="14"></svg> DNS <span class="count">{{ p.dns_entries.length }}</span>
+        <svg lucideGlobe size="14"></svg> DNS <span class="count">{{ dnsEntries().length }}</span>
       </button>
       <button type="button" class="tab" [class.active]="activeTab() === 'tech'" (click)="activeTab.set('tech')">
-        <svg lucideLayers size="14"></svg> Tech Stack <span class="count">{{ p.technologies.length }}</span>
+        <svg lucideLayers size="14"></svg> Tech Stack <span class="count">{{ technologies().length }}</span>
       </button>
       <button type="button" class="tab" [class.active]="activeTab() === 'ep'" (click)="activeTab.set('ep')">
-        <svg lucideActivity size="14"></svg> Endpoints <span class="count">{{ p.endpoints.length }}</span>
+        <svg lucideActivity size="14"></svg> Endpoints <span class="count">{{ endpoints().length }}</span>
       </button>
       <button type="button" class="tab" [class.active]="activeTab() === 'ssl'" (click)="activeTab.set('ssl')">
-        <svg lucideShieldCheck size="14"></svg> SSL/TLS <span class="count">{{ p.certificates.length }}</span>
+        <svg lucideShieldCheck size="14"></svg> SSL/TLS <span class="count">{{ certificates().length }}</span>
       </button>
     </div>
+
     <div class="flex flex-col flex-1 min-h-0">
       @switch (activeTab()) {
-        @case ('dns') { <app-dns-tab [entries]="p.dns_entries" /> }
-        @case ('tech') { <app-tech-tab [technologies]="p.technologies" /> }
-        @case ('ep') { <app-endpoints-tab [endpoints]="p.endpoints" /> }
-        @case ('ssl') { <app-ssl-tab [certificates]="p.certificates" /> }
+        @case ('dns') {
+          @if (loading().dns) { <div class="tab-state">Loading DNS records…</div> }
+          @else if (errors().dns) { <div class="tab-state error">{{ errors().dns }}</div> }
+          @else { <app-dns-tab [entries]="dnsEntries()" /> }
+        }
+        @case ('tech') {
+          @if (loading().tech) { <div class="tab-state">Loading technologies…</div> }
+          @else if (errors().tech) { <div class="tab-state error">{{ errors().tech }}</div> }
+          @else { <app-tech-tab [technologies]="technologies()" /> }
+        }
+        @case ('ep') {
+          @if (loading().ep) { <div class="tab-state">Loading endpoints…</div> }
+          @else if (errors().ep) { <div class="tab-state error">{{ errors().ep }}</div> }
+          @else { <app-endpoints-tab [endpoints]="endpoints()" /> }
+        }
+        @case ('ssl') {
+          @if (loading().ssl) { <div class="tab-state">Loading certificate…</div> }
+          @else if (errors().ssl) { <div class="tab-state error">{{ errors().ssl }}</div> }
+          @else { <app-ssl-tab [certificates]="certificates()" /> }
+        }
       }
     </div>
   } @else if (!projectId()) {
@@ -52,24 +80,19 @@
         <button class="btn" (click)="openNavLeft()">Go to saved projects</button>
       </div>
     </div>
+  } @else if (notFound()) {
+    <div class="error-body">
+      <svg lucideSearch size="48px" color="var(--accent)" strokeWidth="1.5px"></svg>
+      <p class="text-2xl font-bold text-(--text) text-center">Project not found</p>
+      <p class="text-(--text-2) w-100 text-center">Pick a project from the sidebar or start a fresh analysis from a URL or HAR file.</p>
+      <div class="flex gap-4 navbar-close-open-button">
+        <button class="btn btn-primary" (click)="openNewProject()">New project</button>
+        <button class="btn" (click)="openNavLeft()">Go to saved projects</button>
+      </div>
+    </div>
   } @else {
     <div class="error-body">
-      <div class="error-body">
-        <svg lucideSearch size="48px" color="var(--accent)" strokeWidth="1.5px"></svg>
-        <p class="text-2xl font-bold text-(--text) text-center">Project not found</p>
-        <p class="text-(--text-2) w-100 text-center">Pick a project from the sidebar or start a fresh analysis from a URL or HAR file.</p>
-        <div class="flex gap-4 navbar-close-open-button">
-          <button class="btn btn-primary" (click)="openNewProject()">New project</button>
-          <button class="btn" (click)="openNavLeft()">Go to saved projects</button>
-        </div>
-      </div>
+      <p class="text-(--text-2)">Loading project…</p>
     </div>
   }
 </div>
-
-<!---->
-
-<!--{{projectId()}}-->
-
-
-

@@ -27,3 +27,17 @@
   flex-direction: column;
   height: 100%;
 }
+
+.tab-state {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.tab-state.error {
+  color: var(--danger-2);
+}

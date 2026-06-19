@@ -63,10 +63,10 @@ export class NewProject {
       next: res => {
         this.loading.set(false)
         if (!res.isSuccess) {
-          this.error.set(res.message)
+          this.error.set(res.errorMessage ?? 'Could not create project. Please try again.')
         } else {
           this.projectService.getProjects().subscribe()
-          this.router.navigate(['/projects', res.data.id])
+          this.router.navigate(['/projects', res.data.projectId])
           this.closeProject.emit()
         }
       },

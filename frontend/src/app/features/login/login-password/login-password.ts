@@ -29,7 +29,7 @@ export class LoginPassword {
     this.authService.login(this.form.controls.email.value!, this.form.controls.password.value!).subscribe(
       (res) => {
         if (!res.isSuccess) {
-          this.error.set(res.message);
+          this.error.set(res.errorMessage ?? res.message ?? 'Something went wrong.');
           return;
         }
         this.router.navigate(['/projects']);

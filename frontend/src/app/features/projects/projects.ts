@@ -43,7 +43,7 @@ export class Projects implements OnDestroy, OnInit {
     this.projectService.getProjects().subscribe({
       next: res => {
         if (!res.isSuccess) {
-          this.projectsError.set(res.message)
+          this.projectsError.set(res.errorMessage ?? 'Could not load projects.')
         }
       },
       error: () => this.projectsError.set('Could not load projects.'),

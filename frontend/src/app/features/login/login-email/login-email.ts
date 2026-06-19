@@ -65,7 +65,7 @@ export class LoginEmail {
     this.authService.codeSubmit(this.mailForm.controls.email.value!, this.fullCode()).subscribe(
       (res) => {
         if (!res.isSuccess) {
-          this.stage2Error.set(res.message)
+          this.stage2Error.set(res.errorMessage ?? res.message ?? 'Something went wrong.')
           return;
         }
         this.router.navigate(['/projects']);
@@ -78,7 +78,7 @@ export class LoginEmail {
     this.authService.register(this.mailForm.controls.email.value!).subscribe({
       next: (res) => {
         if (!res.isSuccess) {
-          this.stage1Error.set(res.message)
+          this.stage1Error.set(res.errorMessage ?? res.message ?? 'Something went wrong.')
           return;
         }
         this.codeForm.reset();

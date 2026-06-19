@@ -44,7 +44,7 @@ export class ChangePassword {
   submit() {
     this.authService.changePassword(this.form.controls.password1.value!).subscribe(res => {
       if (!res.isSuccess) {
-        this.error.set(res.message)
+        this.error.set(res.errorMessage ?? res.message ?? 'Something went wrong.')
       } else {
         this.closeChangePassword.emit()
       }

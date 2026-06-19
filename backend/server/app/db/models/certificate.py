@@ -17,4 +17,6 @@ class Certificate(Base):
     valid_to             = Column(DateTime,      nullable=False)
     serial_number        = Column(VARCHAR(40),   nullable=False)
     public_key_type      = Column(VARCHAR(15),   nullable=False)
-    fingerprint_sha256   = Column(CHAR(64),      nullable=False, unique=True)
+    # NOT unique: the same certificate (identical fingerprint) is stored once
+    # per analysis, and recurs across analyses/projects for the same domain.
+    fingerprint_sha256   = Column(CHAR(64),      nullable=False)

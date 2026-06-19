@@ -45,8 +45,8 @@ def _fetch_dns(domain: str, analysis_id: int):
     entries = _dedupe_dns_entries(entries)
 
     with db_handler.transaction() as db:
-        # Delete current DB entries, insert new Records
-        db.query(DB_DNSEntry).delete(synchronize_session=False)
+        # Replace only THIS analysis' entries, not every project's.
+        db.query(DB_DNSEntry).where(DB_DNSEntry.analysis_id == analysis_id).delete(synchronize_session=False)
 
         for entry in entries:
             db.add(DB_DNSEntry(
@@ -70,8 +70,8 @@ def _fetch_cert(domain: str, analysis_id: int):
     cert.analysis_id = analysis_id
 
     with db_handler.transaction() as db:
-        # Delete last certificate and replace with current one
-        db.query(DB_Certificate).delete(synchronize_session=False)
+        # Replace only THIS analysis' certificate, not every project's.
+        db.query(DB_Certificate).where(DB_Certificate.analysis_id == analysis_id).delete(synchronize_session=False)
         db.add(cert)
 
     # TODO: remove
