@@ -3,9 +3,10 @@ from uuid import uuid4
 from pathlib import Path
 import json
 
-from app.api.schemas import BaseResponse, AnalysisStartData, project
-from app.api.schemas import Project, DNSEntry, DNSEntryType
-from app.api.schemas._responses import AnalysisStart, Projects
+from app.api.schemas import PatchProject
+from app.api.schemas import BaseResponse, CreateProject, AnalysisStart, ProjectWithAnalysisId, FileUpload
+from app.api.schemas import Project, DNSEntry, DNSEntryType, Endpoint
+from app.config import get_settings
 from app.db import db_handler
 from app.db.models import Certificate as DB_Certificate, Analysis as DB_Analysis, Project as DB_Project, DNSEntry as DB_DNSEntry, HarFile as DB_HarFile, Endpoint as DB_Endpoint
 from app.tools.har import validate_har, parse_hars
@@ -100,7 +101,20 @@ def _analyze_har(project_id: int, analysis_id: int):
     with db_handler.transaction() as db:
         db.query(DB_Endpoint).where(DB_Endpoint.analysis_id == analysis_id).delete(synchronize_session=False)
 
-@projects.get("", response_model=Projects)
+        for endpoint in endpoints:
+            e = DB_Endpoint(
+                analysis_id=analysis_id,
+                method=endpoint.method,
+                path=endpoint.path,
+                status=endpoint.status,
+                content_type=endpoint.content_type
+            )
+            db.add(e)
+
+
+
+
+@projects.get("", response_model=BaseResponse[list[ProjectWithAnalysisId]])
 def get_projects():
     # TODO: implement auth
 
@@ -120,7 +134,8 @@ def get_projects():
     return BaseResponse.ok(projects)
 
 
-@projects.post("")
+
+@projects.post("", response_model=BaseResponse[CreateProject])
 def create_project(create_project: Project):
     # TODO: implement auth
     project_id = None
@@ -133,7 +148,7 @@ def create_project(create_project: Project):
         db.flush()
         project_id = project.id
 
-    return BaseResponse(data={"projectId" : project_id})  # only for testing
+    return BaseResponse.ok(CreateProject(project_id=project_id))
 
 
 
