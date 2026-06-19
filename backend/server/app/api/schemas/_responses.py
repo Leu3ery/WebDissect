@@ -1,4 +1,4 @@
-from typing import Any, TypeVar, Generic
+from typing import TypeVar, Generic, Optional
 from pydantic import BaseModel, Field
 
 from .project import Project
@@ -7,26 +7,34 @@ T = TypeVar("T")
 
 
 class BaseResponse(BaseModel, Generic[T]):
-    is_success: bool          = Field(serialization_alias="isSuccess", default=True)
-    error_message: str | None = Field(serialization_alias="errorMessage", default=None)
-    data: T                   = Field()
+    is_success: bool             = Field(serialization_alias="isSuccess", default=True)
+    error_message: Optional[str] = Field(serialization_alias="errorMessage", default=None)
+    data: Optional[T]            = Field(default=None)
+
+    @classmethod
+    def ok(cls, data: T | None = None) -> "BaseResponse[T]":
+        return cls(is_success=True, data=data)
+
+    @classmethod
+    def fail(cls, message: str) -> "BaseResponse[T]":
+        return cls(is_success=False, error_message=message)
 
 
+class CreateProject(BaseModel):
+    project_id: int = Field(serialization_alias="projectId")
 
-class AnalysisStartData(BaseModel):
+
+class AnalysisStart(BaseModel):
     analysis_id: int = Field(serialization_alias="analysisId")
 
-class AnalysisStart(BaseResponse[AnalysisStartData]):
-    data: AnalysisStartData
+
+class ProjectWithAnalysisId(BaseModel):
+    project: Project        = Field(description="Project")
+    analysis_id: int | None = Field(description="Latest analysis id", default=None)
 
 
-
-class Projects(BaseModel):
-    projects: list[Project]
-
-class ProjectsData(BaseResponse[Projects]):
-    data: Projects
-
+class FileUpload(BaseModel):
+    entry_count: int = Field(serialization_alias="entryCount")
 
 class ProjectData(BaseResponse[Project]):
     data: Project

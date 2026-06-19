@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 import tldextract
 
 
@@ -13,9 +13,8 @@ class Project(BaseModel):
     id: int | None      = Field(description="Project ID", default=None)
     name: str           = Field(description="Project Name")
     domain: str         = Field(description="Domain of the analyzed website")
-    user_id: int | None = Field(description="id of the project owner", default=None)
 
-    @field_validator("domain")
+    @field_validator("domain", mode="before")
     @classmethod
     def validate_domain(cls, v: str) -> str:
         v = v.strip().lower().rstrip(".")

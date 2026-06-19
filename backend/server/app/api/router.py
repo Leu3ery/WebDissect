@@ -5,13 +5,13 @@ from app.db import DBError, DBIntegrityError, DBConnectionError
 
 
 async def _integrity(request: Request, exc: DBIntegrityError):
-    return JSONResponse(status_code=409, content={"detail": "Constraint violation"})
+    return JSONResponse(status_code=409, content={"message": "Constraint violation", "details" : exc.args})
 
 async def _conn(request: Request, exc: DBConnectionError):
-    return JSONResponse(status_code=503, content={"detail": "Database unavailable"})
+    return JSONResponse(status_code=503, content={"message": "Database unavailable", "details" : exc.args})
 
 async def _db(request: Request, exc: DBError):
-    return JSONResponse(status_code=500, content={"detail": "Database error"})
+    return JSONResponse(status_code=500, content={"message": "Database error", "details" : exc.args})
 
 
 def setup_router(subrouters: list[APIRouter]) -> FastAPI:
