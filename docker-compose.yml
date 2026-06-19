@@ -3,7 +3,7 @@ services:
         expose:
             - "6767"
         volumes:
-            -   "./db:/app/db"
+            - "./storage:/app/storage"
         env_file:
             -  ".env"
         build:
