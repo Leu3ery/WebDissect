@@ -10,8 +10,12 @@ services:
             context: .
             dockerfile: backend/server/Dockerfile
     frontend-server:
-        ports:
-            - "80:80"
+        # No host port binding here: on Dokploy the host's :80 is owned by the
+        # built-in Traefik proxy. Routing is done via a Domain configured in the
+        # Dokploy UI (service frontend-server, container port 80). For local dev
+        # the published port lives in docker-compose.override.yml.
+        expose:
+            - "80"
         build:
             context: ./frontend
             dockerfile: Dockerfile

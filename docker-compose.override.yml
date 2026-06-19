@@ -1,0 +1,8 @@
+# Local development only. `docker compose up` auto-loads this file on top of
+# docker-compose.yml and publishes the frontend on http://localhost.
+# Dokploy runs `docker compose -f ./docker-compose.yml up`, which does NOT load
+# this override, so it won't try to bind the host's :80 (owned by Traefik).
+services:
+    frontend-server:
+        ports:
+            - "80:80"
