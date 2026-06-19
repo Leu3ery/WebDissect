@@ -1,5 +1,6 @@
 export const config = {
   appName: "WebDissect",
-  apiUrl: 'http://localhost:8080/api',
-
+  // Relative path so the same build works behind nginx (prod) and the
+  // Angular dev-server proxy (see proxy.conf.json).
+  apiUrl: '/api',
 }

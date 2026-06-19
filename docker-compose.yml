@@ -3,13 +3,25 @@ services:
         expose:
             - "6767"
         volumes:
-            -   "./db:/app/db"
+            # Named volume (Docker-managed) instead of a host bind mount:
+            # the container can always write here, and it survives redeploys.
+            # A bind mount to the cloned repo dir caused "readonly database".
+            -   "dbdata:/app/db"
         env_file:
             -  ".env"
+        environment:
+            ENV: "production"
         build:
             context: .
             dockerfile: backend/server/Dockerfile
+        restart: unless-stopped
+        networks:
+            - web
+
     frontend-server:
+        # No host port publish: Traefik (Dokploy) reaches the container on
+        # port 80 over the dokploy-network. Publishing a host port here only
+        # risks clashing with other Dokploy apps.
         expose:
             - "80"
         build:
@@ -17,4 +29,15 @@ services:
             dockerfile: Dockerfile
         depends_on:
             -   backend-server
+        restart: unless-stopped
+        networks:
+            - web              # talk to backend-server (nginx proxy_pass)
+            - dokploy-network  # be reachable by Dokploy's Traefik
 
+networks:
+    web:
+    dokploy-network:
+        external: true
+
+volumes:
+    dbdata:

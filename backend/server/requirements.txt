@@ -5,7 +5,7 @@ resend
 # API
 fastapi
 python-jose
-uvicorn
+uvicorn[standard]
 python-multipart
 
 # DB
@@ -15,3 +15,6 @@ sqlalchemy
 pydantic
 pydantic-settings
 
+# Tools
+dnspython
+cryptography
